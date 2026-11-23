@@ -64,13 +64,20 @@ h1 { font-size: 24px; margin: 4px 0 0; }
 .btn { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 12px 14px; font-weight: 600; text-align: center; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn.danger { color: var(--danger); }
+.rtime { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 78px; }
+.rtime small { font-size: 12px; font-weight: 600; margin-left: 2px; }
+.rstate { font-size: 12px; font-weight: 700; }
+.rstate.done { color: var(--ok); } .rstate.missed { color: var(--danger); } .rstate.snoozed { color: var(--warn); }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.days button { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 10px 0; font-weight: 700; font-size: 13px; color: var(--fg); }
+.days button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .star { border: 0; background: transparent; font-size: 24px; color: var(--line); padding: 4px; line-height: 1; }
 .star.on { color: #E3A008; }
 .badge { font-size: 11px; font-weight: 700; color: var(--danger); border: 1px solid currentColor; border-radius: 6px; padding: 1px 5px; margin-left: 4px; }
 label.f { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
 label.f input, label.f select { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 11px 12px; font-size: 16px; font-weight: 400; color: var(--fg); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px max(6px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px max(6px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
 .tabs button { border: 0; background: transparent; display: grid; justify-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 0; }
 .tabs button svg { width: 22px; height: 22px; }
 .tabs button.on { color: var(--accent); }
@@ -105,6 +112,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     gauge: '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/>',
     apps: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+    bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>'
   };
   const ic = n => `<svg class="i" viewBox="0 0 24 24">${ICON[n]}</svg>`;
@@ -122,11 +130,12 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
       set: { unknownDial: true, blockUnknown: false, smsLinks: false, sos: true, xl: false },
       night: { on: false, from: '22:00', to: '07:00' },
       pin: '8515', name: 'Dad', guardian: 'Ravi',
-      contacts: []
+      contacts: [], rem: []
     };
   }
 
   let store = load();
+  if (!store.cfg.rem) store.cfg.rem = [];
   let tab = 'home', appsMode = null, editing = null, sendState = 'idle', status = null;
 
   function load() {
@@ -335,6 +344,63 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
       ${isNew ? '' : '<button class="btn danger" data-a="delc">Delete contact</button>'}`;
   }
 
+  /* ----- reminders ----- */
+  const DAYN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  function t12(at) { const [h, m] = at.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')}<small>${h < 12 ? 'AM' : 'PM'}</small>`; }
+  function repeatText(r) {
+    if (r.dt) { const d = new Date(r.dt + 'T00:00'); return 'Once, ' + d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }); }
+    if (!r.d.length || r.d.length === 7) return 'Every day';
+    if (r.d.join() === '1,2,3,4,5') return 'Weekdays';
+    if (r.d.join() === '6,7') return 'Weekends';
+    return r.d.map(n => DAYN[n - 1]).join(', ');
+  }
+  const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+  function todayState(r) {
+    const e = (status && status.rl || []).find(x => x.i === r.i && sameDay(x.at, Date.now()));
+    if (!e) return '';
+    const w = new Date(e.w).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+    return e.s === 'done' ? `<span class="rstate done">✓ Done today at ${w}</span>` : e.s === 'missed' ? `<span class="rstate missed">Missed today</span>` : `<span class="rstate snoozed">Snoozed at ${w}</span>`;
+  }
+  function reminders() {
+    const c = store.cfg;
+    if (editing && editing.kind === 'rem') return reminderForm();
+    const list = [...c.rem].sort((a, b) => a.at.localeCompare(b.at));
+    const log = (status && status.rl || []).slice(0, 8);
+    return `<h1>Reminders</h1><p class="sub">${esc(c.name)}'s phone rings, shows the message in big text and reads it aloud. ${esc(c.name)} taps Done or Remind me in 10 min.</p>
+      <div class="card">${list.length ? list.map((r, i) => `${i ? '<div class="sep"></div>' : ''}<div class="row">
+          <div class="rtime" data-a="redit" data-v="${r.i}">${t12(r.at)}</div>
+          <div class="t" data-a="redit" data-v="${r.i}"><b>${esc(r.t)}</b><span>${repeatText(r)}${r.on ? '' : ' · Paused'}</span>${todayState(r)}</div>
+          ${sw(r.on, 'ron', r.i)}</div>`).join('')
+        : '<div class="info">No reminders yet. Add medicines, meals, a walk, or anything else.</div>'}</div>
+      <button class="btn primary" data-a="radd">Add reminder</button>
+      ${log.length ? `<div class="card"><h3>Recent</h3>${log.map((e, i) => `${i ? '<div class="sep"></div>' : ''}<div class="row"><div class="t"><b>${esc(e.t)}</b><span>${new Date(e.at).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</span></div><span class="rstate ${e.s}">${e.s === 'done' ? '✓ Done' : e.s === 'missed' ? 'Missed' : 'Snoozed'}</span></div>`).join('')}</div>` : ''}
+      ${sendLine()}`;
+  }
+  function reminderForm() {
+    const r = editing.r, isNew = editing.i < 0;
+    const mode = r.dt ? 'once' : !r.d.length || r.d.length === 7 ? 'daily' : 'days';
+    return `<h1>${isNew ? 'Add reminder' : 'Edit reminder'}</h1>
+      <div class="card">
+        <label class="f">Message<input id="rt" value="${esc(r.t)}" placeholder="Take your BP tablet" maxlength="80"></label>
+        <label class="f">Time<input id="rtime" type="time" value="${esc(r.at)}"></label>
+        <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)">Repeat
+          <div class="seg">${[['daily', 'Every day'], ['days', 'Some days'], ['once', 'Once']].map(([k, l]) => `<button class="${mode === k ? 'on' : ''}" data-a="rmode" data-v="${k}">${l}</button>`).join('')}</div></div>
+        ${mode === 'days' ? `<div class="days">${DAYN.map((d, i) => `<button class="${r.d.includes(i + 1) ? 'on' : ''}" data-a="rday" data-v="${i + 1}">${d[0]}${d[1]}</button>`).join('')}</div>` : ''}
+        ${mode === 'once' ? `<label class="f">Date<input id="rdate" type="date" value="${esc(r.dt)}"></label>` : ''}
+      </div>
+      <button class="btn primary" data-a="rsave">Save</button>
+      <button class="btn" data-a="cancelc">Cancel</button>
+      ${isNew ? '' : '<button class="btn danger" data-a="rdel">Delete reminder</button>'}`;
+  }
+  function keepRem() {
+    if (!editing || editing.kind !== 'rem') return;
+    const g = id => { const el = document.getElementById(id); return el ? el.value : null; };
+    if (g('rt') !== null) editing.r.t = g('rt');
+    if (g('rtime') !== null) editing.r.at = g('rtime');
+    if (g('rdate') !== null) editing.r.dt = g('rdate');
+  }
+  const todayIso = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
   function settings() {
     const c = store.cfg;
     return `<h1>Settings</h1>
@@ -366,10 +432,10 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     const tabs = document.getElementById('tabs');
     if (!store.pair) { app.innerHTML = unpaired(); tabs.hidden = true; return; }
     const active = document.activeElement && document.activeElement.id;
-    if (active && ['cn', 'cr', 'cp', 'sname', 'sguard', 'spin'].includes(active)) return; // don't wipe typing
-    app.innerHTML = tab === 'home' ? home() : tab === 'apps' ? apps() : tab === 'contacts' ? contacts() : settings();
+    if (active && ['cn', 'cr', 'cp', 'sname', 'sguard', 'spin', 'rt', 'rtime', 'rdate'].includes(active)) return; // don't wipe typing
+    app.innerHTML = tab === 'home' ? home() : tab === 'apps' ? apps() : tab === 'contacts' ? contacts() : tab === 'rem' ? reminders() : settings();
     tabs.hidden = false;
-    tabs.innerHTML = [['home', 'gauge', 'Phone'], ['apps', 'apps', 'Apps'], ['contacts', 'user', 'Contacts'], ['settings', 'gear', 'Settings']]
+    tabs.innerHTML = [['home', 'gauge', 'Phone'], ['apps', 'apps', 'Apps'], ['contacts', 'user', 'Contacts'], ['rem', 'bell', 'Reminders'], ['settings', 'gear', 'Settings']]
       .map(([k, i, l]) => `<button class="${tab === k ? 'on' : ''}" data-a="tab" data-v="${k}">${ic(i)}${l}</button>`).join('');
   }
 
@@ -405,6 +471,27 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
         break;
       }
       case 'delc': { const i = editing.i; editing = null; change(c => c.contacts.splice(i, 1)); break; }
+      case 'radd': editing = { kind: 'rem', i: -1, r: { i: 'r' + Date.now().toString(36), t: '', at: '09:00', d: [], dt: '', on: true } }; render(); break;
+      case 'redit': { const i = c.rem.findIndex(x => x.i === v); editing = { kind: 'rem', i, r: { ...c.rem[i], d: [...c.rem[i].d] } }; render(); break; }
+      case 'ron': change(c => { const r = c.rem.find(x => x.i === v); if (r) r.on = !r.on; }); break;
+      case 'rmode': keepRem(); { const r = editing.r;
+        if (v === 'daily') { r.d = []; r.dt = ''; }
+        if (v === 'days') { r.dt = ''; if (!r.d.length || r.d.length === 7) r.d = [1, 2, 3, 4, 5]; }
+        if (v === 'once') { r.d = []; r.dt = r.dt || todayIso(); } }
+        render(); break;
+      case 'rday': { keepRem(); const n = +v, d = editing.r.d; const k = d.indexOf(n); if (k >= 0) d.splice(k, 1); else { d.push(n); d.sort(); } render(); break; }
+      case 'rsave': {
+        keepRem(); const r = editing.r; r.t = r.t.trim();
+        if (!r.t) { toast('Type the reminder message.'); break; }
+        if (!/^\d{2}:\d{2}$/.test(r.at)) { toast('Pick a time.'); break; }
+        if (r.dt === '' && editing.r.d.length === 0 && document.querySelector('.days')) { toast('Pick at least one day.'); break; }
+        const i = editing.i; editing = null;
+        document.activeElement && document.activeElement.blur();
+        change(c => { if (i < 0) c.rem.push(r); else c.rem[i] = r; });
+        toast('Saved. ' + c.name + "'s phone gets it within 30 seconds.");
+        break;
+      }
+      case 'rdel': { const i = editing.i; editing = null; change(c => c.rem.splice(i, 1)); break; }
       case 'copysos': copy(store.pair.topic + 'a'); break;
       case 'resend': store.cfg.ts = Date.now(); save(); publish(); toast('Sent'); break;
       case 'unpair': if (b.dataset.sure) { store.pair = null; keyP = null; status = null; save(); render(); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to unpair'; } break;
