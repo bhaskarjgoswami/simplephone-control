@@ -199,6 +199,15 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
         const p = await decrypt(o.message);
         if (p) { status = JSON.parse(p); break; }
       }
+      if (status && Array.isArray(status.add) && status.t > (store.seenAdd || 0)) {
+        store.seenAdd = status.t;
+        const key = x => String(x).replace(/\D/g, '').slice(-10);
+        const fresh = status.add.filter(a => a && a.n && a.p && !store.cfg.contacts.some(c => key(c.p) === key(a.p)));
+        if (fresh.length) {
+          change(c => fresh.forEach(a => c.contacts.push({ n: a.n, r: a.r || '', p: a.p, f: 0, s: 0 })));
+          toast((store.cfg.name || 'The phone') + ' added ' + fresh.map(a => a.n).join(', '));
+        } else save();
+      }
       if (status && status.a >= store.cfg.ts && sendState === 'sent') sendState = 'applied';
       render();
     } catch (e) {}
