@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SimplePhone">
+<meta name="theme-color" content="#F3F6F3">
+<title>SimplePhone Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #F3F6F3; --fg: #16201B; --muted: #5A6760; --line: #D5DCD6; --panel: #FFFFFF;
+  --accent: #2F6B4F; --accent-ink: #FFFFFF; --danger: #C62828; --warn: #B26A00; --ok: #2E7D32;
+  --chip: #EEF2EE;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0F1411; --fg: #E4EBE6; --muted: #93A199; --line: #2A332D; --panel: #171D19;
+    --accent: #74C29A; --accent-ink: #0C1510; --danger: #EF6B6B; --warn: #E0A13A; --ok: #6CC77A; --chip: #1E2621; color-scheme: dark; }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Inter", -apple-system, system-ui, sans-serif; font-size: 15px; }
+body { padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) calc(84px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.wrap { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; padding-top: 12px; }
+h1 { font-size: 24px; margin: 4px 0 0; }
+.sub { color: var(--muted); font-size: 13.5px; line-height: 1.45; margin: -6px 0 0; }
+.head { display: flex; align-items: center; gap: 12px; }
+.av { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 20px; flex: none; background: #5D4037; }
+.head .t { flex: 1; min-width: 0; }
+.head b { display: block; font-size: 18px; }
+.head small { color: var(--muted); font-size: 12.5px; display: flex; gap: 6px; align-items: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.on { background: var(--ok); }
+.batt { font-weight: 600; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.card h3 { margin: 0; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { border: 0; background: transparent; border-radius: 9px; padding: 10px 0; font-weight: 600; color: var(--muted); }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.info { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); }
+.status { font-size: 12.5px; display: flex; gap: 6px; align-items: center; color: var(--muted); }
+.status.sending { color: var(--warn); }
+.status.done { color: var(--ok); }
+.status.err { color: var(--danger); }
+.row { display: flex; align-items: center; gap: 12px; }
+.row .t { flex: 1; min-width: 0; }
+.row .t b { display: block; font-size: 14px; font-weight: 600; }
+.row .t span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.sep { height: 1px; background: var(--line); }
+.sw { width: 50px; height: 30px; border-radius: 999px; border: 0; background: var(--line); position: relative; flex: none; padding: 0; transition: background .15s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.sw.on { background: var(--accent); }
+.sw.on::after { transform: translateX(20px); }
+.appic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: #fff; font-size: 18px; flex: none; font-weight: 700; }
+.lock { font-size: 12px; color: var(--muted); font-weight: 600; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 12px 14px; font-weight: 600; text-align: center; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.danger { color: var(--danger); }
+.star { border: 0; background: transparent; font-size: 24px; color: var(--line); padding: 4px; line-height: 1; }
+.star.on { color: #E3A008; }
+.badge { font-size: 11px; font-weight: 700; color: var(--danger); border: 1px solid currentColor; border-radius: 6px; padding: 1px 5px; margin-left: 4px; }
+label.f { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+label.f input, label.f select { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 11px 12px; font-size: 16px; font-weight: 400; color: var(--fg); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px max(6px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
+.tabs button { border: 0; background: transparent; display: grid; justify-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 0; }
+.tabs button svg { width: 22px; height: 22px; }
+.tabs button.on { color: var(--accent); }
+svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.toast { position: fixed; left: 16px; right: 16px; top: calc(12px + env(safe-area-inset-top)); z-index: 10; background: var(--fg); color: var(--bg); border-radius: 14px; padding: 12px 14px; font-weight: 600; font-size: 14px; max-width: 520px; margin: 0 auto; box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); }
+.code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; word-break: break-all; }
+ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<nav class="tabs" id="tabs" hidden></nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  const NTFY = 'https://ntfy.sh/';
+  const LS = 'simplephone.control.v1';
+  const APPS = {
+    contacts: ['Contacts', '#2E7D32', true], messages: ['Messages', '#1565C0', true], dial: ['Dial', '#00796B', true],
+    whatsapp: ['WhatsApp', '#1E8E3E'], camera: ['Camera', '#6A1B9A'], photos: ['Photos', '#AD4E00'],
+    youtube: ['YouTube', '#B71C1C'], chrome: ['Internet', '#37474F']
+  };
+  const ORDER = Object.keys(APPS);
+  const MODE_INFO = {
+    basic: 'Only Contacts, Messages and Dial. Everything else is locked away.',
+    normal: 'Calls and SMS, plus the everyday apps you allow.',
+    full: 'Everything you allow, including YouTube and Internet.'
+  };
+  const ICON = {
+    gauge: '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/>',
+    apps: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>'
+  };
+  const ic = n => `<svg class="i" viewBox="0 0 24 24">${ICON[n]}</svg>`;
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+
+  function defaults() {
+    return {
+      v: 1, ts: 0, mode: 'normal',
+      modes: {
+        basic: ['contacts', 'messages', 'dial'],
+        normal: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos'],
+        full: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos', 'youtube', 'chrome']
+      },
+      set: { unknownDial: true, blockUnknown: false, smsLinks: false, sos: true, xl: false },
+      night: { on: false, from: '22:00', to: '07:00' },
+      pin: '2580', name: 'Mom', guardian: 'Ravi',
+      contacts: []
+    };
+  }
+
+  let store = load();
+  let tab = 'home', appsMode = null, editing = null, sendState = 'idle', status = null;
+
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem(LS)); if (s) return s; } catch (e) {}
+    return { pair: null, cfg: defaults() };
+  }
+  function save() { try { localStorage.setItem(LS, JSON.stringify(store)); } catch (e) {} }
+
+  // Pairing link from the QR code on the Android phone: #p=<topic>.<key>
+  const m = location.hash.match(/^#p=([a-z0-9]+)\.([A-Za-z0-9_-]+)$/);
+  if (m) {
+    store.pair = { topic: m[1], key: m[2] };
+    save();
+    history.replaceState(null, '', location.pathname);
+    setTimeout(() => { publish(); toast('Paired with ' + store.cfg.name + "'s phone"); }, 300);
+  }
+
+  /* ----- crypto: AES-256-GCM, same format as the Android app ----- */
+  const b64u = {
+    enc: b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+    dec: s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+  };
+  let keyP = null;
+  function key() {
+    if (!keyP) keyP = crypto.subtle.importKey('raw', b64u.dec(store.pair.key), 'AES-GCM', false, ['encrypt', 'decrypt']);
+    return keyP;
+  }
+  async function encrypt(text) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await key(), new TextEncoder().encode(text));
+    const out = new Uint8Array(12 + ct.byteLength); out.set(iv); out.set(new Uint8Array(ct), 12);
+    return b64u.enc(out);
+  }
+  async function decrypt(s) {
+    try {
+      const all = b64u.dec(s.trim());
+      const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(0, 12) }, await key(), all.slice(12));
+      return new TextDecoder().decode(pt);
+    } catch (e) { return null; }
+  }
+
+  /* ----- sync ----- */
+  let pubTimer = null;
+  function change(fn) {
+    fn(store.cfg);
+    store.cfg.ts = Date.now();
+    save(); sendState = 'sending'; render();
+    clearTimeout(pubTimer); pubTimer = setTimeout(publish, 500);
+  }
+  async function publish() {
+    if (!store.pair) return;
+    sendState = 'sending'; render();
+    try {
+      if (!store.cfg.ts) store.cfg.ts = Date.now();
+      const body = await encrypt(JSON.stringify(store.cfg));
+      const r = await fetch(NTFY + store.pair.topic + 'c', { method: 'POST', body });
+      sendState = r.ok ? 'sent' : 'error';
+    } catch (e) { sendState = 'error'; }
+    render();
+  }
+  async function pollStatus() {
+    if (!store.pair) return;
+    try {
+      const r = await fetch(NTFY + store.pair.topic + 's/json?poll=1&since=12h');
+      const text = await r.text();
+      const lines = text.split('\n').filter(Boolean).reverse();
+      for (const line of lines) {
+        const o = JSON.parse(line);
+        if (o.event !== 'message') continue;
+        const p = await decrypt(o.message);
+        if (p) { status = JSON.parse(p); break; }
+      }
+      if (status && status.a >= store.cfg.ts && sendState === 'sent') sendState = 'applied';
+      render();
+    } catch (e) {}
+  }
+  setInterval(pollStatus, 20000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pollStatus(); });
+
+  /* ----- UI helpers ----- */
+  let toastT;
+  function toast(s) { const t = document.getElementById('toast'); t.textContent = s; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+  const sw = (on, act, val) => `<button class="sw${on ? ' on' : ''}" role="switch" aria-checked="${on}" data-a="${act}" data-v="${val || ''}"></button>`;
+  function ago(t) {
+    const s = Math.round((Date.now() - t) / 1000);
+    if (s < 90) return 'just now';
+    if (s < 3600) return Math.round(s / 60) + ' min ago';
+    if (s < 86400) return Math.round(s / 3600) + ' h ago';
+    return Math.round(s / 86400) + ' days ago';
+  }
+  function header() {
+    const c = store.cfg;
+    const online = status && Date.now() - status.t < 15 * 60000;
+    const seen = status ? (online ? 'Online, seen ' + ago(status.t) : 'Last seen ' + ago(status.t)) : 'Waiting for the phone to check in';
+    return `<div class="head"><div class="av">${esc((c.name || 'M')[0])}</div>
+      <div class="t"><b>${esc(c.name)}'s phone</b><small><span class="dot${online ? ' on' : ''}"></span>${seen}</small></div>
+      <div class="batt">${status && status.b >= 0 ? status.b + '%' + (status.ch ? ' ⚡' : '') : ''}</div></div>`;
+  }
+  function sendLine() {
+    if (sendState === 'sending') return `<div class="status sending">Sending...</div>`;
+    if (sendState === 'sent') return `<div class="status sending">Sent. ${esc(store.cfg.name)}'s phone picks it up within 30 seconds.</div>`;
+    if (sendState === 'applied') return `<div class="status done">✓ Active on ${esc(store.cfg.name)}'s phone</div>`;
+    if (sendState === 'error') return `<div class="status err">Could not send. Check your internet and try again.</div>`;
+    return status ? `<div class="status done">✓ Phone is in ${cap(status.m)} mode${status.lk ? ', locked' : ''}</div>` : '';
+  }
+
+  /* ----- screens ----- */
+  function unpaired() {
+    return `<h1>SimplePhone Control</h1>
+      <p class="sub">Control your parent's simple Android phone from here.</p>
+      <div class="card"><h3>Pair with the phone</h3>
+        <ol>
+          <li>On the Android phone, tap the battery number (top right) 7 times.</li>
+          <li>Enter the family PIN (2580 the first time).</li>
+          <li>Point this iPhone's Camera at the QR code and tap the link.</li>
+        </ol>
+      </div>`;
+  }
+
+  function home() {
+    const c = store.cfg, m = c.mode;
+    const wa = c.modes[m].includes('whatsapp');
+    return `${header()}
+      <div class="card"><h3>Mode</h3>
+        <div class="seg">${['basic', 'normal', 'full'].map(x => `<button class="${x === m ? 'on' : ''}" data-a="mode" data-v="${x}">${cap(x)}</button>`).join('')}</div>
+        <div class="info">${MODE_INFO[m]}</div>
+        <div class="chips">${c.modes[m].map(a => `<span class="chip">${APPS[a][0]}</span>`).join('')}</div>
+        ${m !== 'basic' ? `<div class="sep"></div><div class="row"><div class="appic" style="background:${APPS.whatsapp[1]}">W</div><div class="t"><b>Show WhatsApp</b><span>${wa ? 'Visible' : 'Hidden'} in ${cap(m)} mode</span></div>${sw(wa, 'wa', m)}</div>` : ''}
+        ${sendLine()}
+      </div>
+      <div class="card"><h3>Safety</h3>
+        <div class="row"><div class="t"><b>Allow calling new numbers</b><span>Off means only saved contacts can be called</span></div>${sw(c.set.unknownDial, 'set', 'unknownDial')}</div>
+        <div class="sep"></div>
+        <div class="row"><div class="t"><b>Block unknown callers</b><span>Numbers not in Contacts never ring</span></div>${sw(c.set.blockUnknown, 'set', 'blockUnknown')}</div>
+        <div class="sep"></div>
+        <div class="row"><div class="t"><b>Open links in SMS</b><span>Keep off to stop scam links</span></div>${sw(c.set.smsLinks, 'set', 'smsLinks')}</div>
+        <div class="sep"></div>
+        <div class="row"><div class="t"><b>Show SOS button</b><span>${sosLine()}</span></div>${sw(c.set.sos, 'set', 'sos')}</div>
+      </div>
+      <div class="card"><h3>Display</h3>
+        <div class="row"><div class="t"><b>Extra large text</b><span>Makes every word bigger</span></div>${sw(c.set.xl, 'set', 'xl')}</div>
+      </div>
+      <div class="card"><h3>Night lock</h3>
+        <div class="row"><div class="t"><b>Basic mode at night</b><span>Every day, ${esc(c.night.from)} to ${esc(c.night.to)}</span></div>${sw(c.night.on, 'night')}</div>
+        <div class="grid2">
+          <label class="f">From<input type="time" id="nfrom" value="${esc(c.night.from)}"></label>
+          <label class="f">To<input type="time" id="nto" value="${esc(c.night.to)}"></label>
+        </div>
+      </div>`;
+  }
+  function sosLine() {
+    const s = store.cfg.contacts.filter(x => x.s > 0).sort((a, b) => a.s - b.s);
+    return s.length ? 'SMS with location to ' + s.map(x => esc(x.n)).join(', ') + ', then calls ' + esc(s[0].n) : 'Add SOS people in Contacts first';
+  }
+
+  function apps() {
+    const c = store.cfg, m = appsMode || c.mode;
+    return `<h1>Apps</h1><p class="sub">Choose what ${esc(c.name)} can open in each mode.</p>
+      <div class="seg">${['basic', 'normal', 'full'].map(x => `<button class="${x === m ? 'on' : ''}" data-a="appsmode" data-v="${x}">${cap(x)}${x === c.mode ? ' •' : ''}</button>`).join('')}</div>
+      <div class="card">${ORDER.map((a, i) => {
+        const [label, color, core] = APPS[a];
+        const on = c.modes[m].includes(a);
+        const locked = core || m === 'basic';
+        return `${i ? '<div class="sep"></div>' : ''}<div class="row"><div class="appic" style="background:${color}">${label[0]}</div>
+          <div class="t"><b>${label}</b><span>${core ? 'Always on' : m === 'basic' ? 'Never in Basic mode' : on ? 'Visible' : 'Hidden'}</span></div>
+          ${locked ? '<span class="lock">Locked</span>' : sw(on, 'app', a)}</div>`;
+      }).join('')}</div>
+      <p class="sub" style="margin:0">• is the mode the phone uses now. Apps that are not installed on the phone are skipped.</p>
+      ${sendLine()}`;
+  }
+
+  function contacts() {
+    const c = store.cfg;
+    const favs = c.contacts.filter(x => x.f).length;
+    if (editing) return contactForm();
+    return `<h1>Contacts</h1><p class="sub">Star up to 4 people to show as big call buttons (${favs} of 4). SOS people get an SMS with location.</p>
+      <div class="card">${c.contacts.length ? c.contacts.map((p, i) => `${i ? '<div class="sep"></div>' : ''}<div class="row">
+          <div class="av" style="width:40px;height:40px;font-size:17px;background:${['#B4532A', '#7B3FA0', '#1565C0', '#C2185B', '#00796B', '#5D4037'][i % 6]}">${esc(p.n[0])}</div>
+          <div class="t" data-a="edit" data-v="${i}"><b>${esc(p.n)}${p.s ? `<span class="badge">SOS ${p.s}</span>` : ''}</b><span>${esc(p.r)} · ${esc(p.p)}</span></div>
+          <button class="star${p.f ? ' on' : ''}" data-a="fav" data-v="${i}" aria-label="Home screen">★</button></div>`).join('')
+        : '<div class="info">No contacts yet. Add the people your parent calls most.</div>'}</div>
+      <button class="btn primary" data-a="add">Add contact</button>
+      ${sendLine()}`;
+  }
+  function contactForm() {
+    const p = editing.p;
+    const isNew = editing.i < 0;
+    return `<h1>${isNew ? 'Add contact' : 'Edit contact'}</h1>
+      <div class="card">
+        <label class="f">Name<input id="cn" value="${esc(p.n)}" placeholder="Ravi"></label>
+        <label class="f">Relation<input id="cr" value="${esc(p.r)}" placeholder="Son"></label>
+        <label class="f">Phone number<input id="cp" value="${esc(p.p)}" inputmode="tel" placeholder="+91 98640 12345"></label>
+        <label class="f">SOS order<select id="cs">${[0, 1, 2, 3].map(n => `<option value="${n}"${p.s === n ? ' selected' : ''}>${n ? 'SOS person ' + n + (n === 1 ? ' (called first)' : '') : 'Not an SOS person'}</option>`).join('')}</select></label>
+      </div>
+      <button class="btn primary" data-a="savec">Save</button>
+      <button class="btn" data-a="cancelc">Cancel</button>
+      ${isNew ? '' : '<button class="btn danger" data-a="delc">Delete contact</button>'}`;
+  }
+
+  function settings() {
+    const c = store.cfg;
+    return `<h1>Settings</h1>
+      <div class="card"><h3>Names</h3>
+        <label class="f">Your parent's name<input id="sname" value="${esc(c.name)}"></label>
+        <label class="f">Your name (shown on their phone)<input id="sguard" value="${esc(c.guardian)}"></label>
+      </div>
+      <div class="card"><h3>Family PIN</h3>
+        <div class="info">Unlocks the family settings on the phone (tap the battery number 7 times).</div>
+        <label class="f">PIN (4 to 8 digits)<input id="spin" value="${esc(c.pin)}" inputmode="numeric" maxlength="8"></label>
+      </div>
+      <div class="card"><h3>SOS alerts on this iPhone</h3>
+        <ol>
+          <li>Install the free <b>ntfy</b> app from the App Store.</li>
+          <li>Tap +, keep server ntfy.sh, and subscribe to this topic:</li>
+        </ol>
+        <div class="code" id="sostopic">${store.pair ? esc(store.pair.topic + 'a') : ''}</div>
+        <button class="btn" data-a="copysos">Copy topic</button>
+        <div class="info">You will get a loud alert with the map location when SOS is pressed. Keep this topic private.</div>
+      </div>
+      <div class="card"><h3>Sync</h3>
+        <button class="btn" data-a="resend">Send all settings again</button>
+        <button class="btn danger" data-a="unpair">Unpair this iPhone</button>
+      </div>`;
+  }
+
+  function render() {
+    const app = document.getElementById('app');
+    const tabs = document.getElementById('tabs');
+    if (!store.pair) { app.innerHTML = unpaired(); tabs.hidden = true; return; }
+    const active = document.activeElement && document.activeElement.id;
+    if (active && ['cn', 'cr', 'cp', 'sname', 'sguard', 'spin'].includes(active)) return; // don't wipe typing
+    app.innerHTML = tab === 'home' ? home() : tab === 'apps' ? apps() : tab === 'contacts' ? contacts() : settings();
+    tabs.hidden = false;
+    tabs.innerHTML = [['home', 'gauge', 'Phone'], ['apps', 'apps', 'Apps'], ['contacts', 'user', 'Contacts'], ['settings', 'gear', 'Settings']]
+      .map(([k, i, l]) => `<button class="${tab === k ? 'on' : ''}" data-a="tab" data-v="${k}">${ic(i)}${l}</button>`).join('');
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    const a = b.dataset.a, v = b.dataset.v;
+    const c = store.cfg;
+    switch (a) {
+      case 'tab': tab = v; editing = null; appsMode = null; render(); window.scrollTo(0, 0); break;
+      case 'mode': if (v !== c.mode) change(c => c.mode = v); break;
+      case 'wa': change(c => toggleApp(c, v, 'whatsapp')); break;
+      case 'set': change(c => c.set[v] = !c.set[v]); break;
+      case 'night': change(c => c.night.on = !c.night.on); break;
+      case 'appsmode': appsMode = v; render(); break;
+      case 'app': change(c => toggleApp(c, appsMode || c.mode, v)); break;
+      case 'fav': {
+        const p = c.contacts[+v];
+        if (!p.f && c.contacts.filter(x => x.f).length >= 4) { toast('The home screen holds 4 people. Remove a star first.'); break; }
+        change(c => c.contacts[+v].f = p.f ? 0 : 1); break;
+      }
+      case 'add': editing = { i: -1, p: { n: '', r: '', p: '', f: 0, s: 0 } }; render(); break;
+      case 'edit': editing = { i: +v, p: { ...c.contacts[+v] } }; render(); break;
+      case 'cancelc': editing = null; render(); break;
+      case 'savec': {
+        const p = { n: val('cn'), r: val('cr'), p: val('cp'), f: editing.p.f || 0, s: +document.getElementById('cs').value };
+        if (!p.n || p.p.replace(/\D/g, '').length < 6) { toast('Add a name and a full phone number.'); break; }
+        const i = editing.i; editing = null;
+        document.activeElement && document.activeElement.blur();
+        change(c => {
+          if (p.s) c.contacts.forEach((x, j) => { if (x.s === p.s && j !== i) x.s = 0; });
+          if (i < 0) c.contacts.push(p); else c.contacts[i] = p;
+        });
+        break;
+      }
+      case 'delc': { const i = editing.i; editing = null; change(c => c.contacts.splice(i, 1)); break; }
+      case 'copysos': copy(store.pair.topic + 'a'); break;
+      case 'resend': store.cfg.ts = Date.now(); save(); publish(); toast('Sent'); break;
+      case 'unpair': if (b.dataset.sure) { store.pair = null; keyP = null; status = null; save(); render(); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to unpair'; } break;
+    }
+  });
+  document.addEventListener('change', e => {
+    const id = e.target.id;
+    if (id === 'nfrom' || id === 'nto') change(c => c.night[id === 'nfrom' ? 'from' : 'to'] = e.target.value);
+    if (id === 'sname') change(c => c.name = e.target.value.trim() || 'Mom');
+    if (id === 'sguard') change(c => c.guardian = e.target.value.trim() || 'family');
+    if (id === 'spin') {
+      const p = e.target.value.replace(/\D/g, '');
+      if (p.length < 4) { toast('PIN needs 4 to 8 digits'); e.target.value = c.pin; return; }
+      change(c => c.pin = p); toast('PIN changed');
+    }
+  });
+  function val(id) { return (document.getElementById(id).value || '').trim(); }
+  function toggleApp(c, mode, app) {
+    if (mode === 'basic' || APPS[app][2]) return;
+    const list = c.modes[mode];
+    const i = list.indexOf(app);
+    if (i >= 0) list.splice(i, 1); else { list.push(app); list.sort((x, y) => ORDER.indexOf(x) - ORDER.indexOf(y)); }
+  }
+  function copy(s) {
+    navigator.clipboard.writeText(s).then(() => toast('Copied'), () => {
+      const r = document.createRange(); r.selectNodeContents(document.getElementById('sostopic'));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('Selected. Tap Copy.');
+    });
+  }
+
+  render();
+  pollStatus();
+})();
+</script>
+</body>
+</html>
