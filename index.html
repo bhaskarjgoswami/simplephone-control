@@ -127,7 +127,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
         normal: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos'],
         full: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos', 'youtube', 'chrome']
       },
-      set: { unknownDial: true, blockUnknown: false, smsLinks: false, sos: true, xl: false, lock: true },
+      set: { unknownDial: true, blockUnknown: false, smsLinks: false, sos: true, xl: false, lock: true, popups: true },
       night: { on: false, from: '22:00', to: '07:00' },
       pin: '8515', name: 'Dad', guardian: 'Ravi',
       contacts: [], rem: []
@@ -286,6 +286,9 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
       </div>
       <div class="card"><h3>Lock</h3>
         <div class="row"><div class="t"><b>Lock phone</b><span>${c.set.lock !== false ? 'On: top settings panel and back/home bar are hidden' : 'Off: Dad can open settings and use the back/home bar'}</span></div>${sw(c.set.lock !== false, 'set', 'lock')}</div>
+      </div>
+      <div class="card"><h3>Notifications</h3>
+        <div class="row"><div class="t"><b>App pop-ups</b><span>${c.set.popups !== false ? 'On: banners from WhatsApp and other apps show' : 'Off: hidden. Calls, SMS, SOS and reminders still come through'}${c.set.popups === false && status && status.nl === false ? '. Needs one-time setup on Dad\'s phone (family settings, Set up pop-up blocker)' : ''}</span></div>${sw(c.set.popups !== false, 'set', 'popups')}</div>
       </div>
       <div class="card"><h3>Display</h3>
         <div class="row"><div class="t"><b>Extra large text</b><span>Makes every word bigger</span></div>${sw(c.set.xl, 'set', 'xl')}</div>
@@ -450,7 +453,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
       case 'tab': tab = v; editing = null; appsMode = null; render(); window.scrollTo(0, 0); break;
       case 'mode': if (v !== c.mode) change(c => c.mode = v); break;
       case 'wa': change(c => toggleApp(c, v, 'whatsapp')); break;
-      case 'set': change(c => c.set[v] = v === 'lock' ? c.set.lock === false : !c.set[v]); break;
+      case 'set': change(c => c.set[v] = (v === 'lock' || v === 'popups') ? c.set[v] === false : !c.set[v]); break;
       case 'night': change(c => c.night.on = !c.night.on); break;
       case 'appsmode': appsMode = v; render(); break;
       case 'app': change(c => toggleApp(c, appsMode || c.mode, v)); break;
