@@ -335,7 +335,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     return `<h1>${isNew ? 'Add contact' : 'Edit contact'}</h1>
       <div class="card">
         <label class="f">Name<input id="cn" value="${esc(p.n)}" placeholder="Ravi"></label>
-        <label class="f">Relation<input id="cr" value="${esc(p.r)}" placeholder="Son"></label>
+        <label class="f">Description<input id="cr" value="${esc(p.r)}" placeholder="Place or work (optional)"></label>
         <label class="f">Phone number<input id="cp" value="${esc(p.p)}" inputmode="tel" placeholder="+91 98640 12345"></label>
         <label class="f">SOS order<select id="cs">${[0, 1, 2, 3].map(n => `<option value="${n}"${p.s === n ? ' selected' : ''}>${n ? 'SOS person ' + n + (n === 1 ? ' (called first)' : '') : 'Not an SOS person'}</option>`).join('')}</select></label>
       </div>
