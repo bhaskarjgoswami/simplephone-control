@@ -157,6 +157,9 @@ ol { margin: 0; padding-left: 20px; line-height: 1.55; font-size: 16px; }
 .bar i.over { background: var(--danger); }
 .loc { display: flex; gap: 12px; align-items: center; }
 .ask { background: #FFF6E0; }
+.pinrow { display: flex; gap: 8px; align-items: stretch; }
+.pinrow input { flex: 1; min-width: 0; letter-spacing: .12em; }
+.showpin { flex: none; border: 0; border-radius: 10px; padding: 0 16px; background: var(--fill); color: var(--accent); font: inherit; font-size: 16px; }
 .book { display: grid; gap: 8px; }
 .book input[type=search] { width: 100%; font: inherit; font-size: 17px; padding: 10px 12px; border-radius: 10px; border: 0; background: var(--fill); color: var(--fg); }
 .blist { max-height: 300px; overflow: auto; border-radius: 10px; }
@@ -478,6 +481,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
   }
 
   /** Same rule as the phone: not 1234, not one digit repeated, not a run like 2345 or 9876. */
+  let pinShown = false;
   function weakPin(p) {
     p = String(p || '');
     if (p.length < 4 || p === '1234' || new Set(p).size === 1) return true;
@@ -507,7 +511,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       <div class="card">
         <label class="f">Their name<input id="newname" placeholder="${setupPick === 'child' ? 'Aarav' : 'Dadu'}"></label>
         <label class="f">Your name (shown on their phone)<input id="newguard" placeholder="${setupPick === 'child' ? 'Mummy' : 'Ravi'}" value="${esc(book.devices.find(d => d.cfg)?.cfg.guardian || '')}"></label>
-        <label class="f">New family PIN (4 to 8 digits)<input id="newpin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="Not 1234"></label>
+        <label class="f">New family PIN (4 to 8 digits)<span class="pinrow"><input id="newpin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="Not 1234"><button type="button" class="showpin" data-a="showpin" data-v="newpin" aria-pressed="false">Show</button></span></label>
         <div class="info">Opens the family settings on their phone. Pick one ${setupPick === 'child' ? 'your child' : 'nobody else'} can't guess, not a birthday.</div>
       </div>
       <button class="btn primary" data-a="setup">Start</button>`;
@@ -797,7 +801,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       <div class="card"><h3>Family PIN</h3>
         <div class="info">Unlocks the family settings on the phone (tap the battery number 7 times). You get an alert when it is used or guessed wrong.</div>
         ${weakPin(c.pin) ? `<div class="info" style="color:var(--danger)"><b>Easy to guess.</b> Until you change it, Normal phone and Remove lockdown stay off on the phone.</div>` : ''}
-        <label class="f">PIN (4 to 8 digits)<input id="spin" type="password" value="${esc(c.pin)}" inputmode="numeric" maxlength="8" autocomplete="new-password"></label>
+        <label class="f">PIN (4 to 8 digits)<span class="pinrow"><input id="spin" type="${pinShown ? 'text' : 'password'}" value="${esc(c.pin)}" inputmode="numeric" maxlength="8" autocomplete="new-password"><button type="button" class="showpin" data-a="showpin" data-v="spin" aria-pressed="${pinShown}">${pinShown ? 'Hide' : 'Show'}</button></span></label>
       </div>
       <div class="card"><h3>SOS${isKid() ? ' and location' : ''} alerts on this iPhone</h3>
         <ol>
@@ -903,6 +907,13 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       case 'bookopen': keepForm(); books.get(store.id).open = true; render(); break;
       case 'bookclose': keepForm(); books.get(store.id).open = false; render(); break;
       case 'pickbook': { keepForm(); const bk = books.get(store.id), x = bk.list[+v]; editing.p.n = x[0]; editing.p.p = x[1]; bk.open = false; render(); toast(x[0] + ' picked. Add a photo or description, then Save.'); break; }
+      case 'showpin': { // switch the field in place, so typing isn't lost
+        const f = document.getElementById(v); if (!f) break;
+        const show = f.type === 'password'; f.type = show ? 'text' : 'password';
+        b.textContent = show ? 'Hide' : 'Show'; b.setAttribute('aria-pressed', show);
+        if (v === 'spin') pinShown = show;
+        break;
+      }
       case 'savec': {
         const phNew = editing.photo;
         const p = { n: val('cn'), r: val('cr'), p: val('cp'), f: editing.p.f || 0, s: +document.getElementById('cs').value };
