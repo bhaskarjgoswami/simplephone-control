@@ -814,8 +814,8 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       </div>
       <div class="card"><h3>Normal phone</h3>
         ${status && status.np
-          ? `<div class="info"><b>${esc(c.name)}'s phone is a normal phone now.</b> KinPhone is off: no lock, time limits, reminders or call blocking. To turn it back on, open the KinPhone app on ${esc(c.name)}'s phone and tap <b>Use KinPhone again</b>.</div>`
-          : `<div class="info">Turns KinPhone off on ${esc(c.name)}'s phone and gives back its own home screen, phone and SMS apps. Contacts and settings are kept. To turn it on again, open the KinPhone app on the phone and tap Use KinPhone again.</div>
+          ? `<div class="info"><b>${esc(c.name)}'s phone is a normal phone now.</b> KinPhone is off: no lock, time limits, reminders or call blocking. To turn it back on, open the <b>KinPhone app</b> on ${esc(c.name)}'s phone.</div>`
+          : `<div class="info">KinPhone closes on ${esc(c.name)}'s phone and its own home screen comes back by itself. Contacts and settings are kept. To turn KinPhone on again, just open the KinPhone app on the phone.</div>
         <button class="btn" data-a="normal">${c.req && c.req.type === 'normal' && Date.now() - (c.req.ts || 0) < 120000 ? 'Sent. Waiting for the phone' : 'Switch to a normal phone'}</button>`}
       </div>
       <div class="card"><h3>Sync</h3>
