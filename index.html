@@ -208,11 +208,11 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
   };
   const ORDER = Object.keys(APPS);
   const MODE_INFO = {
-    basic: 'Photo Dial, Contacts, Messages and Dial. Everything else is locked away.',
+    basic: 'Photo Dial, Contacts, Messages and Dial, plus Camera and Photos if you switch them on. Everything else is locked away.',
     full: 'Calls and messages, plus only the apps you choose below.'
   };
   const MODE_INFO_KID = {
-    basic: 'Photo Dial, calls and messages only. A good first phone.',
+    basic: 'Photo Dial, calls and messages, plus Camera and Photos if you switch them on. A good first phone.',
     full: 'Calls and messages, plus only the apps you choose. Time limits and bedtime still apply.'
   };
   const isKid = (c = store.cfg) => c && c.profile === 'child';
@@ -549,6 +549,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
         <div class="sep"></div>
         <div class="info">${m === 'basic' ? 'On the phone now:' : 'Apps on the phone now:'}</div>
         <div class="chips">${c.modes[m].map(a => `<span class="chip">${APPS[a][0]}</span>`).join('')}</div>
+        ${m === 'basic' ? BASIC_OK.map(a => `<div class="sep"></div><div class="row"><div class="appic" style="background:${APPS[a][1]}">${APPS[a][0][0]}</div><div class="t"><b>${APPS[a][0]} in Basic mode</b><span>${c.modes.basic.includes(a) ? 'On: shown on the home screen' : 'Off: hidden'}</span></div>${sw(c.modes.basic.includes(a), 'app', a)}</div>`).join('') : ''}
         ${m === 'full' ? `<button class="btn" data-a="tab" data-v="apps">Choose apps for Full mode</button>` : ''}
         ${sendLine()}
       </div>
@@ -587,14 +588,14 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
   function apps() {
     const c = store.cfg, m = c.mode;
     return `<h1>Apps</h1><p class="sub">${m === 'basic'
-      ? `${esc(c.name)}'s phone is in <b>Basic</b> mode: just Photo Dial, Contacts, Messages and Dial. Switch to Full on the Phone tab to choose more apps.`
+      ? `${esc(c.name)}'s phone is in <b>Basic</b> mode: Photo Dial, Contacts, Messages and Dial. You can also switch on Camera and Photos. For other apps, switch to Full on the Phone tab.`
       : `${esc(c.name)}'s phone is in <b>Full</b> mode. Choose which apps ${esc(c.name)} can open.`}</p>
       <div class="card">${ORDER.map((a, i) => {
         const [label, color, core] = APPS[a];
         const on = c.modes[m].includes(a);
-        const locked = core || m === 'basic';
+        const locked = core || (m === 'basic' && !BASIC_OK.includes(a));
         return `${i ? '<div class="sep"></div>' : ''}<div class="row"><div class="appic" style="background:${color}">${label[0]}</div>
-          <div class="t"><b>${label}</b><span>${core ? 'Always on' : m === 'basic' ? 'Never in Basic mode' : on ? 'Visible' : 'Hidden'}</span></div>
+          <div class="t"><b>${label}</b><span>${core ? 'Always on' : locked ? 'Only in Full mode' : on ? 'Visible' : 'Hidden'}</span></div>
           ${locked ? '<span class="lock">Locked</span>' : sw(on, 'app', a)}</div>`;
       }).join('')}</div>
       ${isKid() ? limitsCard() : ''}
@@ -1009,8 +1010,10 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
     if (fresh && old) old.replaceWith(fresh);
   });
   function val(id) { return (document.getElementById(id).value || '').trim(); }
+  /** Apps that can also be switched on in Basic mode (simple, can't lead anywhere risky). */
+  const BASIC_OK = ['camera', 'photos'];
   function toggleApp(c, mode, app) {
-    if (mode === 'basic' || APPS[app][2]) return;
+    if (APPS[app][2] || (mode === 'basic' && !BASIC_OK.includes(app))) return;
     const list = c.modes[mode];
     const i = list.indexOf(app);
     if (i >= 0) list.splice(i, 1); else { list.push(app); list.sort((x, y) => ORDER.indexOf(x) - ORDER.indexOf(y)); }
