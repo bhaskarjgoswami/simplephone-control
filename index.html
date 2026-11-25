@@ -549,8 +549,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
         <div class="sep"></div>
         <div class="info">${m === 'basic' ? 'On the phone now:' : 'Apps on the phone now:'}</div>
         <div class="chips">${c.modes[m].map(a => `<span class="chip">${APPS[a][0]}</span>`).join('')}</div>
-        ${m === 'basic' ? BASIC_OK.map(a => `<div class="sep"></div><div class="row"><div class="appic" style="background:${APPS[a][1]}">${APPS[a][0][0]}</div><div class="t"><b>${APPS[a][0]} in Basic mode</b><span>${c.modes.basic.includes(a) ? 'On: shown on the home screen' : 'Off: hidden'}</span></div>${sw(c.modes.basic.includes(a), 'app', a)}</div>`).join('') : ''}
-        ${m === 'full' ? `<button class="btn" data-a="tab" data-v="apps">Choose apps for Full mode</button>` : ''}
+        <button class="btn" data-a="tab" data-v="apps">Choose apps</button>
         ${sendLine()}
       </div>
       <div class="card"><h3>Safety</h3>
