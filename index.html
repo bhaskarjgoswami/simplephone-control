@@ -124,6 +124,13 @@ ol { margin: 0; padding-left: 20px; line-height: 1.55; font-size: 16px; }
 .devs button.on .mini i { border-color: var(--accent); }
 .devs .mini i.on { background: var(--ok); }
 .devs .add { color: var(--accent); padding: 5px 14px; }
+.headwrap { position: relative; }
+.head .more { flex: none; position: relative; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--fill); color: var(--accent); display: grid; place-items: center; margin-left: 2px; }
+.head .more svg { width: 22px; height: 22px; fill: currentColor; }
+.head .more[aria-expanded=true] { background: var(--accent); color: #fff; }
+.head .more .pip { position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; border-radius: 50%; background: #FF9500; border: 2px solid var(--panel); }
+.phmenu { position: absolute; right: 8px; top: calc(100% + 6px); z-index: 30; width: min(330px, calc(100% - 16px)); background: var(--panel); border-radius: 14px; padding: 6px 14px 10px; box-shadow: 0 18px 50px -12px rgba(0,0,0,.35), 0 0 0 .5px var(--line); display: grid; gap: 8px; }
+.phmenu .mh { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding: 6px 0 0; }
 /* My phones list (Phone tab) */
 .prow { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; padding: 2px 0; text-align: left; font: inherit; color: inherit; }
 .prow .t { flex: 1; min-width: 0; }
@@ -441,22 +448,26 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       return `<button class="${d === store ? 'on' : ''}" data-a="switch" data-v="${d.id}"><span class="mini" style="background:${avColor(d)}">${esc(nm[0])}<i class="${on ? 'on' : ''}"></i></span>${esc(nm)}</button>`;
     }).join('')}<button class="add" data-a="addphone">+ Add phone</button></div>`;
   }
-  function phonesCard() {
-    return `<div class="card"><h3>My phones</h3>${book.devices.map((d, i) => {
+  let phMenu = false;
+  function phonesMenu() {
+    return `<div class="phmenu" role="menu" aria-label="My phones"><div class="mh">My phones</div>${book.devices.map((d, i) => {
       const st = statuses[d.id], on = st && Date.now() - st.t < 15 * 60000;
       const nm = d.cfg ? d.cfg.name : 'New phone';
       const who = d.cfg ? (openAsk(d) ? '⏳ Asking for more time' : st && st.np ? 'Normal phone, KinPhone off' : d.cfg.profile === 'child' ? 'Child' : 'Senior') : 'Setup not finished';
       const bits = [who, st ? (on ? 'Online' : 'Seen ' + ago(st.t)) : 'Not seen yet', st && st.b >= 0 ? st.b + '%' : ''].filter(Boolean).join(' · ');
-      return `${i ? '<div class="sep"></div>' : ''}<button class="prow${d === store ? ' on' : ''}" data-a="switch" data-v="${d.id}" aria-current="${d === store}"><span class="pav" style="background:${avColor(d)}">${esc(nm[0])}<i class="${on ? 'on' : ''}"></i></span><span class="t"><b>${esc(nm)}'s phone</b><span>${bits}</span></span>${d === store ? '<span class="tick" aria-label="Selected">✓</span>' : '<span class="chev" aria-hidden="true">›</span>'}</button>`;
-    }).join('')}<div class="sep"></div><button class="prow add" data-a="addphone"><span class="pav plus" aria-hidden="true">+</span><span class="t"><b>Add another phone</b><span>A parent's or a child's phone</span></span></button></div>`;
+      return `${i ? '<div class="sep"></div>' : ''}<button role="menuitem" class="prow${d === store ? ' on' : ''}" data-a="switch" data-v="${d.id}" aria-current="${d === store}"><span class="pav" style="background:${avColor(d)}">${esc(nm[0])}<i class="${on ? 'on' : ''}"></i></span><span class="t"><b>${esc(nm)}'s phone</b><span>${bits}</span></span>${d === store ? '<span class="tick" aria-label="Selected">✓</span>' : '<span class="chev" aria-hidden="true">›</span>'}</button>`;
+    }).join('')}<div class="sep"></div><button role="menuitem" class="prow add" data-a="addphone"><span class="pav plus" aria-hidden="true">+</span><span class="t"><b>Add another phone</b><span>A parent's or a child's phone</span></span></button></div>`;
   }
   function header(bar = true) {
     const c = store.cfg;
     const online = status && Date.now() - status.t < 15 * 60000;
     const seen = status ? (online ? 'Online, seen ' + ago(status.t) : 'Last seen ' + ago(status.t)) : 'Waiting for the phone to check in';
-    return `${bar ? devBar() : ''}<div class="head"><div class="av" style="background:${avColor(store)}">${esc((c.name || 'M')[0])}</div>
+    const others = book.devices.some(d => d !== store && openAsk(d));
+    return `<div class="headwrap"><div class="head"><div class="av" style="background:${avColor(store)}">${esc((c.name || 'M')[0])}</div>
       <div class="t"><b>${esc(c.name)}'s phone</b><small><span class="dot${online ? ' on' : ''}"></span>${seen} · ${status && status.np ? 'Normal phone' : isKid() ? 'Child' : 'Senior'}</small></div>
-      <div class="batt">${status && status.b >= 0 ? status.b + '%' + (status.ch ? ' ⚡' : '') : ''}</div></div>`;
+      <div class="batt">${status && status.b >= 0 ? status.b + '%' + (status.ch ? ' ⚡' : '') : ''}</div>
+      <button class="more" data-a="phmenu" aria-haspopup="menu" aria-expanded="${phMenu}" aria-label="My phones: switch or add a phone">${'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>'}${others ? '<i class="pip"></i>' : ''}</button></div>
+      ${phMenu ? phonesMenu() : ''}</div>`;
   }
   function sendLine() {
     if (sendState === 'sending') return `<div class="status sending">Sending...</div>`;
@@ -532,7 +543,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
   function home() {
     const c = store.cfg, m = c.mode;
     const wa = c.modes[m].includes('whatsapp');
-    return `${phonesCard()}${header(false)}${askCard()}
+    return `${header()}${askCard()}
       <div class="card"><h3>Mode</h3>
         ${['basic', 'full'].map((x, i) => `${i ? '<div class="sep"></div>' : ''}<button class="opt${x === m ? ' on' : ''}" data-a="mode" data-v="${x}" role="radio" aria-checked="${x === m}"><span class="rad"></span><span class="t"><b>${cap(x)}</b><span>${modeInfo(x)}</span></span></button>`).join('')}
         <div class="sep"></div>
@@ -826,13 +837,15 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
   }
 
   document.addEventListener('click', e => {
+    if (phMenu && !e.target.closest('.phmenu, [data-a="phmenu"]')) { phMenu = false; render(); return; }
     const b = e.target.closest('[data-a]'); if (!b) return;
     const a = b.dataset.a, v = b.dataset.v;
     const c = store.cfg;
     switch (a) {
       case 'tab': tab = v; editing = null; appsMode = null; render(); window.scrollTo(0, 0); if (v === 'loc' || v === 'apps') pollStatus(); break;
-      case 'switch': { const d = book.devices.find(x => x.id === v); if (d && d !== store) { use(d); tab = 'home'; editing = null; appsMode = null; render(); pollStatus(d); window.scrollTo(0, 0); } break; }
-      case 'addphone': adding = true; render(); window.scrollTo(0, 0); break;
+      case 'phmenu': phMenu = !phMenu; render(); break;
+      case 'switch': { phMenu = false; if (v === store.id) { render(); break; } const d = book.devices.find(x => x.id === v); if (d && d !== store) { use(d); tab = 'home'; editing = null; appsMode = null; render(); pollStatus(d); window.scrollTo(0, 0); } break; }
+      case 'addphone': phMenu = false; adding = true; render(); window.scrollTo(0, 0); break;
       case 'canceladd': adding = false; render(); break;
       case 'pick': setupPick = v; setupTouched = true; { const n = val('newname'), g = val('newguard'); render(); document.getElementById('newname').value = n; document.getElementById('newguard').value = g; } break;
       case 'restore': restore.delete(store.id); tryRestore(store); break;
