@@ -6,85 +6,173 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="SimplePhone">
-<meta name="theme-color" content="#F3F6F3">
-<title>SimplePhone Control</title>
+<meta name="apple-mobile-web-app-title" content="KinPhone">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>KinPhone Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
 :root {
-  --bg: #F3F6F3; --fg: #16201B; --muted: #5A6760; --line: #D5DCD6; --panel: #FFFFFF;
-  --accent: #2E7D32; --accent-ink: #FFFFFF; --danger: #C62828; --warn: #B26A00; --ok: #2E7D32;
-  --chip: #EEF2EE;
+  --bg: #F2F2F7; --fg: #000; --muted: #6C6C70; --sub: #8E8E93; --line: rgba(60,60,67,.18); --panel: #FFFFFF;
+  --accent: #007AFF; --accent-ink: #FFFFFF; --switch: #34C759; --danger: #FF3B30; --warn: #FF9500; --ok: #34C759;
+  --chip: rgba(118,118,128,.12); --fill: rgba(118,118,128,.12); --press: rgba(0,0,0,.05);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #0F1411; --fg: #E4EBE6; --muted: #93A199; --line: #2A332D; --panel: #171D19;
-    --accent: #74C29A; --accent-ink: #0C1510; --danger: #EF6B6B; --warn: #E0A13A; --ok: #6CC77A; --chip: #1E2621; color-scheme: dark; }
+  :root { --bg: #000; --fg: #FFF; --muted: #98989F; --sub: #8E8E93; --line: rgba(84,84,88,.6); --panel: #1C1C1E;
+    --accent: #0A84FF; --accent-ink: #FFF; --switch: #30D158; --danger: #FF453A; --warn: #FF9F0A; --ok: #30D158;
+    --chip: rgba(118,118,128,.24); --fill: rgba(118,118,128,.24); --press: rgba(255,255,255,.06); color-scheme: dark; }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Inter", -apple-system, system-ui, sans-serif; font-size: 15px; }
-body { padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) calc(84px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
-button, input, select { font: inherit; color: inherit; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif; font-size: 17px; -webkit-font-smoothing: antialiased; letter-spacing: -.01em; }
+body { padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+button, input, select { font: inherit; color: inherit; letter-spacing: inherit; }
 button { cursor: pointer; }
-.wrap { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; padding-top: 12px; }
-h1 { font-size: 24px; margin: 4px 0 0; }
-.sub { color: var(--muted); font-size: 13.5px; line-height: 1.45; margin: -6px 0 0; }
-.head { display: flex; align-items: center; gap: 12px; }
-.av { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 20px; flex: none; background: #5D4037; }
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; padding-top: 14px; }
+h1 { font-size: 34px; font-weight: 700; letter-spacing: .01em; margin: 8px 0 0; line-height: 1.1; }
+.sub { color: var(--muted); font-size: 15px; line-height: 1.4; margin: -14px 0 0; }
+
+/* profile card at the top, like the Apple ID row */
+.head { display: flex; align-items: center; gap: 14px; background: var(--panel); border-radius: 12px; padding: 12px 16px; }
+.av { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 600; font-size: 25px; flex: none; background: #5D4037; }
 .head .t { flex: 1; min-width: 0; }
-.head b { display: block; font-size: 18px; }
-.head small { color: var(--muted); font-size: 12.5px; display: flex; gap: 6px; align-items: center; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.head b { display: block; font-size: 21px; font-weight: 600; }
+.head small { color: var(--muted); font-size: 14px; display: flex; gap: 6px; align-items: center; margin-top: 2px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sub); }
 .dot.on { background: var(--ok); }
-.batt { font-weight: 600; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-.card h3 { margin: 0; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
-.seg button { border: 0; background: transparent; border-radius: 9px; padding: 10px 0; font-weight: 600; color: var(--muted); }
-.seg button.on { background: var(--accent); color: var(--accent-ink); }
-.info { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.batt { font-weight: 500; font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* grouped list */
+h3.sh { margin: 0 0 -15px 16px; font-size: 13px; font-weight: 400; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+.card { background: var(--panel); border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 11px; overflow: hidden; }
+.card h3 { margin: 0; font-size: 13px; font-weight: 400; text-transform: uppercase; color: var(--muted); }
+.card > .sep { margin-right: -16px; }
+.sep { height: .5px; background: var(--line); margin: 0; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 30px; }
+.row .t { flex: 1; min-width: 0; }
+.row .t b { display: block; font-size: 17px; font-weight: 400; }
+.row .t .badge { display: inline-block; }
+.row .t span { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; margin-top: 1px; }
+.info { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+/* iOS segmented control */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--fill); border-radius: 9px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: transparent; border-radius: 7px; padding: 7px 0; font-weight: 500; font-size: 14px; color: var(--fg); transition: background .2s; }
+.seg button.on { background: var(--panel); font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+@media (prefers-color-scheme: dark) { .seg button.on { background: #636366; } }
+
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); }
-.status { font-size: 12.5px; display: flex; gap: 6px; align-items: center; color: var(--muted); }
+.chip { font-size: 13px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: var(--chip); }
+.status { font-size: 13px; display: flex; gap: 6px; align-items: center; color: var(--muted); }
 .status.sending { color: var(--warn); }
 .status.done { color: var(--ok); }
 .status.err { color: var(--danger); }
-.row { display: flex; align-items: center; gap: 12px; }
-.row .t { flex: 1; min-width: 0; }
-.row .t b { display: block; font-size: 14px; font-weight: 600; }
-.row .t span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
-.sep { height: 1px; background: var(--line); }
-.sw { width: 50px; height: 30px; border-radius: 999px; border: 0; background: var(--line); position: relative; flex: none; padding: 0; transition: background .15s; }
-.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
-.sw.on { background: var(--accent); }
+
+/* iOS switch */
+.sw { width: 51px; height: 31px; border-radius: 999px; border: 0; background: var(--fill); position: relative; flex: none; padding: 0; transition: background .25s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; transition: transform .25s cubic-bezier(.3,.7,.4,1); box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 3px 1px rgba(0,0,0,.06); }
+.sw.on { background: var(--switch); }
 .sw.on::after { transform: translateX(20px); }
-.appic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: #fff; font-size: 18px; flex: none; font-weight: 700; }
-.lock { font-size: 12px; color: var(--muted); font-weight: 600; }
-.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 12px 14px; font-weight: 600; text-align: center; }
-.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.appic { width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 15px; flex: none; font-weight: 600; }
+.lock { font-size: 15px; color: var(--sub); }
+
+/* buttons: primary is a filled pill, others read like iOS list rows */
+.btn { border: 0; background: var(--panel); border-radius: 12px; padding: 13px 16px; font-weight: 400; font-size: 17px; text-align: center; color: var(--accent); }
+.btn:active { background: var(--press); }
+.card .btn { background: var(--fill); border-radius: 10px; padding: 11px 14px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); font-weight: 600; border-radius: 14px; }
 .btn.danger { color: var(--danger); }
-.rtime { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 78px; }
-.rtime small { font-size: 12px; font-weight: 600; margin-left: 2px; }
-.rstate { font-size: 12px; font-weight: 700; }
+.btn[disabled] { opacity: .7; }
+
+.rtime { font-size: 24px; font-weight: 300; font-variant-numeric: tabular-nums; min-width: 82px; }
+.rtime small { font-size: 13px; font-weight: 400; margin-left: 2px; }
+.rstate { font-size: 13px; font-weight: 500; display: block; margin-top: 2px; }
 .rstate.done { color: var(--ok); } .rstate.missed { color: var(--danger); } .rstate.snoozed { color: var(--warn); }
-.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.days button { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 10px 0; font-weight: 700; font-size: 13px; color: var(--fg); }
-.days button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.star { border: 0; background: transparent; font-size: 24px; color: var(--line); padding: 4px; line-height: 1; }
-.star.on { color: #E3A008; }
-.badge { font-size: 11px; font-weight: 700; color: var(--danger); border: 1px solid currentColor; border-radius: 6px; padding: 1px 5px; margin-left: 4px; }
-label.f { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
-label.f input, label.f select { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 11px 12px; font-size: 16px; font-weight: 400; color: var(--fg); }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.days button { border: 0; background: var(--fill); border-radius: 999px; aspect-ratio: 1; font-weight: 600; font-size: 13px; color: var(--fg); }
+.days button.on { background: var(--accent); color: var(--accent-ink); }
+.star { border: 0; background: transparent; font-size: 22px; color: var(--line); padding: 4px; line-height: 1; }
+.star.on { color: #FFCC00; }
+.badge { font-size: 11px; font-weight: 600; color: #fff; background: var(--danger); border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 400; color: var(--muted); }
+label.f input, label.f select { border: 0; background: var(--fill); border-radius: 10px; padding: 11px 12px; font-size: 17px; font-weight: 400; color: var(--fg); -webkit-appearance: none; appearance: none; min-height: 44px; }
+label.f input:focus, label.f select:focus { outline: 2px solid var(--accent); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px max(6px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
-.tabs button { border: 0; background: transparent; display: grid; justify-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 0; }
-.tabs button svg { width: 22px; height: 22px; }
+
+/* frosted tab bar */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(249,249,249,.86); -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px); border-top: .5px solid var(--line); display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 6px max(6px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)); z-index: 5; }
+@media (prefers-color-scheme: dark) { .tabs { background: rgba(22,22,24,.86); } }
+.tabs button { border: 0; background: transparent; display: grid; justify-items: center; gap: 2px; font-size: 10.5px; font-weight: 500; color: var(--sub); padding: 4px 0; letter-spacing: 0; }
+.tabs button svg { width: 26px; height: 26px; }
 .tabs button.on { color: var(--accent); }
-svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.toast { position: fixed; left: 16px; right: 16px; top: calc(12px + env(safe-area-inset-top)); z-index: 10; background: var(--fg); color: var(--bg); border-radius: 14px; padding: 12px 14px; font-weight: 600; font-size: 14px; max-width: 520px; margin: 0 auto; box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); }
-.code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; word-break: break-all; }
-ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
+svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+.toast { position: fixed; left: 16px; right: 16px; top: calc(10px + env(safe-area-inset-top)); z-index: 10; background: rgba(30,30,32,.92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: #fff; border-radius: 16px; padding: 13px 16px; font-weight: 500; font-size: 15px; max-width: 520px; margin: 0 auto; box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); animation: drop .35s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes drop { from { transform: translateY(-20px); opacity: 0; } }
+.code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; background: var(--fill); border-radius: 10px; padding: 11px; word-break: break-all; }
+ol { margin: 0; padding-left: 20px; line-height: 1.55; font-size: 16px; }
+
+/* phone switcher */
+.devs { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 2px; scrollbar-width: none; margin-bottom: -10px; }
+.devs::-webkit-scrollbar { display: none; }
+.devs button { flex: none; display: flex; align-items: center; gap: 8px; border: 0; background: var(--panel); border-radius: 999px; padding: 5px 14px 5px 5px; font-weight: 500; font-size: 15px; }
+.devs button.on { background: var(--accent); color: #fff; }
+.devs .mini { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 600; position: relative; }
+.devs .mini i { position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px; border-radius: 50%; background: var(--sub); border: 2px solid var(--panel); }
+.devs button.on .mini i { border-color: var(--accent); }
+.devs .mini i.on { background: var(--ok); }
+.devs .add { color: var(--accent); padding: 5px 14px; }
+/* My phones list (Phone tab) */
+.prow { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; padding: 2px 0; text-align: left; font: inherit; color: inherit; }
+.prow .t { flex: 1; min-width: 0; }
+.prow .t b { display: block; font-size: 17px; font-weight: 400; }
+.prow.on .t b { font-weight: 600; }
+.prow .t span { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
+.pav { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 17px; font-weight: 600; position: relative; }
+.pav i { position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; border-radius: 50%; background: var(--sub); border: 2px solid var(--panel); }
+.pav i.on { background: var(--ok); }
+.pav.plus { background: var(--fill); color: var(--accent); font-size: 26px; font-weight: 300; }
+.prow.add .t b { color: var(--accent); }
+.prow .tick { color: var(--accent); font-size: 19px; font-weight: 600; }
+.prow .chev { color: var(--sub); font-size: 24px; line-height: 1; }
+
+.pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pick button { border: 2px solid transparent; background: var(--panel); border-radius: 14px; padding: 18px 12px; display: grid; gap: 6px; justify-items: center; text-align: center; }
+.pick button.on { border-color: var(--accent); }
+.pick b { font-size: 17px; font-weight: 600; } .pick span { font-size: 13px; color: var(--muted); line-height: 1.35; } .pick em { font-style: normal; font-size: 34px; }
+.step { display: flex; align-items: center; gap: 0; flex: none; background: var(--fill); border-radius: 9px; }
+.step button { width: 40px; height: 32px; border: 0; background: transparent; font-weight: 400; font-size: 20px; line-height: 1; color: var(--fg); }
+.step b { min-width: 66px; text-align: center; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; border-left: .5px solid var(--line); border-right: .5px solid var(--line); line-height: 20px; }
+.bar { height: 5px; border-radius: 5px; background: var(--fill); overflow: hidden; margin-top: 6px; }
+.bar i { display: block; height: 100%; background: var(--ok); border-radius: 5px; }
+.bar i.over { background: var(--danger); }
+.loc { display: flex; gap: 12px; align-items: center; }
+.ask { background: #FFF6E0; }
+@media (prefers-color-scheme: dark) { .ask { background: #3A2E12; } body .ask .q .hg { background: #5C4714; } }
+.ask .q { display: flex; gap: 12px; align-items: center; }
+.ask .q .hg { width: 40px; height: 40px; flex: none; border-radius: 50%; background: #FFE7A8; display: grid; place-items: center; font-size: 20px; }
+.ask .q b { display: block; font-size: 17px; font-weight: 600; }
+.ask .q span { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
+.ask .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pin { width: 44px; height: 44px; border-radius: 12px; background: #FF3B30; display: grid; place-items: center; color: #fff; flex: none; }
+.pin svg { width: 24px; height: 24px; }
+.tchips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tchips span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; border-radius: 999px; background: var(--fill); font-weight: 500; font-size: 15px; }
+.tchips button { border: 0; background: var(--sub); color: var(--panel); width: 20px; height: 20px; border-radius: 50%; font-size: 11px; line-height: 1; padding: 0; }
+.spin { display: inline-block; width: 13px; height: 13px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sp .8s linear infinite; vertical-align: -2px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size: 15px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: transparent; padding: 2px 0; text-align: left; color: var(--fg); }
+.opt .t { flex: 1; min-width: 0; }
+.opt .t b { display: block; font-size: 17px; font-weight: 400; }
+.opt .t span { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; margin-top: 1px; }
+.opt .rad { width: 24px; height: 24px; flex: none; border-radius: 50%; border: 2px solid var(--sub); position: relative; transition: border-color .2s; }
+.opt .rad::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform .2s cubic-bezier(.3,.8,.4,1.4); }
+.opt.on .rad { border-color: var(--accent); }
+.opt.on .rad::after { transform: scale(1); }
+.opt:active { opacity: .6; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -97,6 +185,8 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
 (function () {
   const NTFY = 'https://ntfy.sh/';
   const LS = 'simplephone.control.v1';
+  const LS2 = 'simplephone.control.v2';
+  const keys = new Map();
   const APPS = {
     contacts: ['Contacts', '#2E7D32', true], messages: ['Messages', '#1565C0', true], dial: ['Dial', '#2E7D32', true],
     whatsapp: ['WhatsApp', '#2E7D32'], camera: ['Camera', '#6A1B9A'], photos: ['Photos', '#AD4E00'],
@@ -104,53 +194,82 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
   };
   const ORDER = Object.keys(APPS);
   const MODE_INFO = {
-    basic: 'Only Contacts, Messages and Dial. Everything else is locked away.',
-    normal: 'Calls and SMS, plus the everyday apps you allow.',
-    full: 'Everything you allow, including YouTube and Internet.'
+    basic: 'Photo Dial, Contacts, Messages and Dial. Everything else is locked away.',
+    full: 'Calls and messages, plus only the apps you choose below.'
   };
+  const MODE_INFO_KID = {
+    basic: 'Photo Dial, calls and messages only. A good first phone.',
+    full: 'Calls and messages, plus only the apps you choose. Time limits and bedtime still apply.'
+  };
+  const isKid = (c = store.cfg) => c && c.profile === 'child';
+  const modeInfo = m => (isKid() ? MODE_INFO_KID : MODE_INFO)[m];
+  const LIMIT_STEPS = [0, 15, 30, 45, 60, 90, 120, 180];
+  const WHY = { ask: 'You asked', sched: 'Scheduled', checkin: 'Check-in', sos: 'SOS' };
   const ICON = {
     gauge: '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/>',
     apps: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
     bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>'
   };
   const ic = n => `<svg class="i" viewBox="0 0 24 24">${ICON[n]}</svg>`;
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const cap = s => s[0].toUpperCase() + s.slice(1);
 
-  function defaults() {
+  function defaults(profile) {
+    const kid = profile === 'child';
     return {
-      v: 1, ts: 0, mode: 'normal',
+      v: 1, ts: 0, mode: kid ? 'basic' : 'full', profile: kid ? 'child' : 'senior',
+      limits: kid ? { youtube: 45, chrome: 30 } : {}, loc: { times: [] }, checkin: ['Reached school', "I'm home"],
       modes: {
         basic: ['contacts', 'messages', 'dial'],
-        normal: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos'],
-        full: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos', 'youtube', 'chrome']
+        full: ['contacts', 'messages', 'dial', 'whatsapp', 'camera', 'photos']
       },
-      set: { unknownDial: true, blockUnknown: false, smsLinks: false, sos: true, xl: false, lock: true, popups: true },
-      night: { on: false, from: '22:00', to: '07:00' },
-      pin: '8515', name: 'Dad', guardian: 'Ravi',
+      set: { unknownDial: !kid, blockUnknown: kid, smsLinks: false, sos: true, xl: false, lock: true, popups: !kid },
+      night: { on: kid, from: kid ? '21:00' : '22:00', to: '07:00' },
+      pin: '1234', name: kid ? 'Child' : 'Dad', guardian: 'Ravi',
       contacts: [], rem: []
     };
   }
-
-  let store = load();
-  if (!store.cfg.rem) store.cfg.rem = [];
-  let tab = 'home', appsMode = null, editing = null, sendState = 'idle', status = null;
-
-  function load() {
-    try { const s = JSON.parse(localStorage.getItem(LS)); if (s) return s; } catch (e) {}
-    return { pair: null, cfg: defaults() };
+  /** Fill in fields added after a config was first made. */
+  function ensure(c) {
+    if (!c) return c;
+    c.rem = c.rem || []; c.profile = c.profile || 'senior'; c.limits = c.limits || {};
+    // Two modes now: an old "Normal" phone becomes Full with the same apps.
+    if (c.modes && c.modes.normal) { if (c.mode === 'normal') { c.mode = 'full'; c.modes.full = c.modes.normal; } delete c.modes.normal; }
+    if (c.mode === 'normal') c.mode = 'full';
+    c.loc = c.loc || { times: [] }; c.loc.times = c.loc.times || [];
+    c.checkin = Array.isArray(c.checkin) && c.checkin.length ? c.checkin : ['Reached school', "I'm home"];
+    return c;
   }
-  function save() { try { localStorage.setItem(LS, JSON.stringify(store)); } catch (e) {} }
 
-  // Pairing link from the QR code on the Android phone: #p=<topic>.<key>
+  /* Several phones: book = { devices: [{ id, pair, cfg, seenAdd, seenCk }], cur } */
+  let book = loadBook();
+  let store = book.devices.find(d => d.id === book.cur) || book.devices[0] || { id: null, pair: null, cfg: null };
+  const statuses = {};
+  let tab = 'home', appsMode = null, editing = null, sendState = 'idle', status = null, adding = false, setupPick = 'senior', setupTouched = false;
+
+  function loadBook() {
+    try { const b = JSON.parse(localStorage.getItem(LS2)); if (b && Array.isArray(b.devices)) { b.devices.forEach(d => ensure(d.cfg)); return b; } } catch (e) {}
+    try {
+      const s = JSON.parse(localStorage.getItem(LS));
+      if (s && s.pair) { const id = 'd' + Date.now().toString(36); return { devices: [{ id, pair: s.pair, cfg: ensure(s.cfg || defaults()), seenAdd: s.seenAdd || 0 }], cur: id }; }
+    } catch (e) {}
+    return { devices: [], cur: null };
+  }
+  function save() { try { localStorage.setItem(LS2, JSON.stringify(book)); } catch (e) {} }
+  function use(d) { store = d; book.cur = d.id; status = statuses[d.id] || null; sendState = 'idle'; save(); }
+
+  // Pairing link from the QR code on the Android phone: #p=<topic>.<key>. A new topic adds a phone.
   const m = location.hash.match(/^#p=([a-z0-9]+)\.([A-Za-z0-9_-]+)$/);
   if (m) {
-    store.pair = { topic: m[1], key: m[2] };
-    save();
+    let d = book.devices.find(x => x.pair && x.pair.topic === m[1]);
+    if (!d) { d = { id: 'd' + Date.now().toString(36), pair: { topic: m[1], key: m[2] }, cfg: null, seenAdd: 0 }; book.devices.push(d); }
+    else { d.pair.key = m[2]; keys.delete(d.id); }
+    use(d);
     history.replaceState(null, '', location.pathname);
-    setTimeout(() => { publish(); toast('Paired with ' + store.cfg.name + "'s phone"); }, 300);
+    if (d.cfg) setTimeout(() => { publish(); toast('Paired with ' + d.cfg.name + "'s phone"); }, 300);
   }
 
   /* ----- crypto: AES-256-GCM, same format as the Android app ----- */
@@ -158,23 +277,46 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     enc: b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
     dec: s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
   };
-  let keyP = null;
-  function key() {
-    if (!keyP) keyP = crypto.subtle.importKey('raw', b64u.dec(store.pair.key), 'AES-GCM', false, ['encrypt', 'decrypt']);
-    return keyP;
+  function key(d = store) {
+    if (!keys.has(d.id)) keys.set(d.id, crypto.subtle.importKey('raw', b64u.dec(d.pair.key), 'AES-GCM', false, ['encrypt', 'decrypt']));
+    return keys.get(d.id);
   }
-  async function encrypt(text) {
+  async function encrypt(text, d = store) {
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await key(), new TextEncoder().encode(text));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await key(d), new TextEncoder().encode(text));
     const out = new Uint8Array(12 + ct.byteLength); out.set(iv); out.set(new Uint8Array(ct), 12);
     return b64u.enc(out);
   }
-  async function decrypt(s) {
+  async function decrypt(s, d = store) {
     try {
       const all = b64u.dec(s.trim());
-      const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(0, 12) }, await key(), all.slice(12));
+      const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(0, 12) }, await key(d), all.slice(12));
       return new TextDecoder().decode(pt);
     } catch (e) { return null; }
+  }
+
+  /* ----- pairing again: take the phone's own copy of its settings (never start blank over them) ----- */
+  const restore = new Map(); // device id -> 'busy' | 'none'
+  async function fetchBackup(d) {
+    try {
+      const r = await fetch(NTFY + d.pair.topic + 'k/json?poll=1&since=all');
+      const lines = (await r.text()).split('\n').filter(Boolean).reverse();
+      for (const line of lines) {
+        const o = JSON.parse(line); if (o.event !== 'message') continue;
+        let body = o.message;
+        if (o.attachment && o.attachment.url) { try { body = await (await fetch(o.attachment.url)).text(); } catch (e) { continue; } }
+        const p = await decrypt(body, d);
+        if (p) { const c = JSON.parse(p); if (c && c.ts) return c; }
+      }
+    } catch (e) {}
+    return null;
+  }
+  async function tryRestore(d = store) {
+    if (d.cfg || restore.get(d.id) === 'busy') return;
+    restore.set(d.id, 'busy'); render();
+    const c = await fetchBackup(d);
+    if (c && !d.cfg) { ensure(c); d.cfg = c; restore.delete(d.id); save(); tab = 'home'; render(); toast('Found ' + c.name + "'s settings on the phone. Nothing was changed."); return; }
+    restore.set(d.id, 'none'); render();
   }
 
   /* ----- sync ----- */
@@ -185,44 +327,92 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     save(); sendState = 'sending'; render();
     clearTimeout(pubTimer); pubTimer = setTimeout(publish, 500);
   }
-  async function publish() {
-    if (!store.pair) return;
-    sendState = 'sending'; render();
-    try {
-      if (!store.cfg.ts) store.cfg.ts = Date.now();
-      const body = await encrypt(JSON.stringify(store.cfg));
-      const r = await fetch(NTFY + store.pair.topic + 'c', { method: 'POST', body });
-      sendState = r.ok ? 'sent' : 'error';
-    } catch (e) { sendState = 'error'; }
-    render();
+  /** Who I am on this page (shown to other family members as "changed by"). */
+  const me = () => book.me || (store.cfg && store.cfg.guardian) || 'Someone in your family';
+
+  /**
+   * Two family members managing one phone: before you edit, take the newest settings anyone published
+   * (another family member on <topic>c, or the phone's own copy on <topic>k), so one never wipes the other's changes.
+   */
+  async function pullNewest(d) {
+    if (!d.pair || !d.cfg) return false;
+    if (d === store && editing) return false; // never swap settings under an open form
+    let best = null;
+    for (const t of ['c', 'k']) {
+      try {
+        const r = await fetch(NTFY + d.pair.topic + t + '/json?poll=1&since=12h');
+        for (const line of (await r.text()).split('\n').filter(Boolean)) {
+          const o = JSON.parse(line); if (o.event !== 'message') continue;
+          let body = o.message;
+          if (o.attachment && o.attachment.url) { try { body = await (await fetch(o.attachment.url)).text(); } catch (e) { continue; } }
+          const p = await decrypt(body, d); if (!p) continue;
+          const c = JSON.parse(p); if (c && c.ts && (!best || c.ts > best.ts)) best = c;
+        }
+      } catch (e) {}
+    }
+    if (!best || best.ts <= d.cfg.ts || (d === store && editing)) return false;
+    const was = d.cfg; ensure(best);
+    best.grants = best.grants || was.grants; // answers already given stay answered
+    d.cfg = best; save();
+    if (best.by && best.by !== me()) toast((best.by) + ' changed ' + best.name + "'s phone. You now see the latest.");
+    if (d === store && !editing) render();
+    return true;
   }
-  async function pollStatus() {
-    if (!store.pair) return;
+
+  async function publish(d = store) {
+    if (!d.pair || !d.cfg) return;
+    const cur = d === store;
+    if (cur) { sendState = 'sending'; render(); }
     try {
-      const r = await fetch(NTFY + store.pair.topic + 's/json?poll=1&since=12h');
+      if (!d.cfg.ts) d.cfg.ts = Date.now();
+      d.cfg.by = me();
+      const body = await encrypt(JSON.stringify(d.cfg), d);
+      const r = await fetch(NTFY + d.pair.topic + 'c', { method: 'POST', body });
+      if (cur) sendState = r.ok ? 'sent' : 'error';
+    } catch (e) { if (cur) sendState = 'error'; }
+    if (cur) render();
+  }
+  async function pollStatus(d = store) {
+    if (!d.pair) return;
+    try {
+      const r = await fetch(NTFY + d.pair.topic + 's/json?poll=1&since=24h');
       const text = await r.text();
       const lines = text.split('\n').filter(Boolean).reverse();
+      let st = null;
       for (const line of lines) {
         const o = JSON.parse(line);
         if (o.event !== 'message') continue;
-        const p = await decrypt(o.message);
-        if (p) { status = JSON.parse(p); break; }
+        const p = await decrypt(o.message, d);
+        if (p) { st = JSON.parse(p); break; }
       }
-      if (status && Array.isArray(status.add) && status.t > (store.seenAdd || 0)) {
-        store.seenAdd = status.t;
+      if (!st) return;
+      statuses[d.id] = st;
+      if (d === store) status = st;
+      if (!d.cfg) { if (st.pf && d === store && !setupTouched) { setupPick = st.pf === 'child' ? 'child' : 'senior'; render(); } return; }
+      if (Array.isArray(st.add) && st.t > (d.seenAdd || 0)) {
+        d.seenAdd = st.t;
         const key = x => String(x).replace(/\D/g, '').slice(-10);
-        const fresh = status.add.filter(a => a && a.n && a.p && !store.cfg.contacts.some(c => key(c.p) === key(a.p)));
+        const fresh = st.add.filter(a => a && a.n && a.p && !d.cfg.contacts.some(c => key(c.p) === key(a.p)));
         if (fresh.length) {
-          change(c => fresh.forEach(a => c.contacts.push({ n: a.n, r: a.r || '', p: a.p, f: 0, s: 0 })));
-          toast((store.cfg.name || 'The phone') + ' added ' + fresh.map(a => a.n).join(', '));
+          fresh.forEach(a => d.cfg.contacts.push({ n: a.n, r: a.r || '', p: a.p, f: 0, s: 0 }));
+          d.cfg.ts = Date.now(); save(); publish(d);
+          toast((d.cfg.name || 'The phone') + ' added ' + fresh.map(a => a.n).join(', '));
         } else save();
       }
-      if (status && status.a >= store.cfg.ts && sendState === 'sent') sendState = 'applied';
-      render();
+      const lastCk = Array.isArray(st.ck) && st.ck.length ? st.ck[st.ck.length - 1] : null;
+      if (lastCk && lastCk.t > (d.seenCk || 0)) {
+        if (d.seenCk) toast(d.cfg.name + ': ' + lastCk.label);
+        d.seenCk = lastCk.t; save();
+      }
+      if (d === store && st.a >= d.cfg.ts && sendState === 'sent') sendState = 'applied';
+      if (st.mt && st.mt.id !== d.seenAsk && openAsk(d)) { d.seenAsk = st.mt.id; save(); if (d !== store) toast(d.cfg.name + ' asks for more time. Tap their phone above.'); }
+      if (d === store || tab === 'home') render();
     } catch (e) {}
   }
-  setInterval(pollStatus, 20000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) pollStatus(); });
+  const pollAll = () => book.devices.forEach(d => { pollStatus(d); pullNewest(d); });
+  setInterval(pollAll, 20000);
+  setInterval(() => { if (store.cfg && store.cfg.req && Date.now() - store.cfg.req.ts < 180000) pollStatus(store); }, 6000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pollAll(); });
 
   /* ----- UI helpers ----- */
   let toastT;
@@ -235,12 +425,30 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     if (s < 86400) return Math.round(s / 3600) + ' h ago';
     return Math.round(s / 86400) + ' days ago';
   }
-  function header() {
+  const AVC = ['#5D4037', '#7B3FA0', '#1565C0', '#C2185B', '#00796B', '#B4532A'];
+  const avColor = d => AVC[Math.max(0, book.devices.indexOf(d)) % AVC.length];
+  function devBar() {
+    return `<div class="devs">${book.devices.map(d => {
+      const st = statuses[d.id], on = st && Date.now() - st.t < 15 * 60000;
+      const nm = d.cfg ? d.cfg.name : 'New phone';
+      return `<button class="${d === store ? 'on' : ''}" data-a="switch" data-v="${d.id}"><span class="mini" style="background:${avColor(d)}">${esc(nm[0])}<i class="${on ? 'on' : ''}"></i></span>${esc(nm)}</button>`;
+    }).join('')}<button class="add" data-a="addphone">+ Add phone</button></div>`;
+  }
+  function phonesCard() {
+    return `<div class="card"><h3>My phones</h3>${book.devices.map((d, i) => {
+      const st = statuses[d.id], on = st && Date.now() - st.t < 15 * 60000;
+      const nm = d.cfg ? d.cfg.name : 'New phone';
+      const who = d.cfg ? (openAsk(d) ? '⏳ Asking for more time' : st && st.np ? 'Normal phone, KinPhone off' : d.cfg.profile === 'child' ? 'Child' : 'Senior') : 'Setup not finished';
+      const bits = [who, st ? (on ? 'Online' : 'Seen ' + ago(st.t)) : 'Not seen yet', st && st.b >= 0 ? st.b + '%' : ''].filter(Boolean).join(' · ');
+      return `${i ? '<div class="sep"></div>' : ''}<button class="prow${d === store ? ' on' : ''}" data-a="switch" data-v="${d.id}" aria-current="${d === store}"><span class="pav" style="background:${avColor(d)}">${esc(nm[0])}<i class="${on ? 'on' : ''}"></i></span><span class="t"><b>${esc(nm)}'s phone</b><span>${bits}</span></span>${d === store ? '<span class="tick" aria-label="Selected">✓</span>' : '<span class="chev" aria-hidden="true">›</span>'}</button>`;
+    }).join('')}<div class="sep"></div><button class="prow add" data-a="addphone"><span class="pav plus" aria-hidden="true">+</span><span class="t"><b>Add another phone</b><span>A parent's or a child's phone</span></span></button></div>`;
+  }
+  function header(bar = true) {
     const c = store.cfg;
     const online = status && Date.now() - status.t < 15 * 60000;
     const seen = status ? (online ? 'Online, seen ' + ago(status.t) : 'Last seen ' + ago(status.t)) : 'Waiting for the phone to check in';
-    return `<div class="head"><div class="av">${esc((c.name || 'M')[0])}</div>
-      <div class="t"><b>${esc(c.name)}'s phone</b><small><span class="dot${online ? ' on' : ''}"></span>${seen}</small></div>
+    return `${bar ? devBar() : ''}<div class="head"><div class="av" style="background:${avColor(store)}">${esc((c.name || 'M')[0])}</div>
+      <div class="t"><b>${esc(c.name)}'s phone</b><small><span class="dot${online ? ' on' : ''}"></span>${seen} · ${status && status.np ? 'Normal phone' : isKid() ? 'Child' : 'Senior'}</small></div>
       <div class="batt">${status && status.b >= 0 ? status.b + '%' + (status.ch ? ' ⚡' : '') : ''}</div></div>`;
   }
   function sendLine() {
@@ -248,36 +456,87 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     if (sendState === 'sent') return `<div class="status sending">Sent. ${esc(store.cfg.name)}'s phone picks it up within 30 seconds.</div>`;
     if (sendState === 'applied') return `<div class="status done">✓ Active on ${esc(store.cfg.name)}'s phone</div>`;
     if (sendState === 'error') return `<div class="status err">Could not send. Check your internet and try again.</div>`;
-    return status ? `<div class="status done">✓ Phone is in ${cap(status.m)} mode${status.lk ? ', locked' : ''}</div>` : '';
+    return status ? `<div class="status done">✓ Phone is in ${cap(status.m || store.cfg.mode)} mode${status.lk ? ', locked' : ''}</div>` : '';
   }
 
+  /** Same rule as the phone: not 1234, not one digit repeated, not a run like 2345 or 9876. */
+  function weakPin(p) {
+    p = String(p || '');
+    if (p.length < 4 || p === '1234' || new Set(p).size === 1) return true;
+    const d = [...p].map(Number), up = d.every((x, i) => !i || x === d[i - 1] + 1), down = d.every((x, i) => !i || x === d[i - 1] - 1);
+    return up || down;
+  }
   /* ----- screens ----- */
+  function setup() {
+    const r = restore.get(store.id), has = status && status.cts > 0;
+    if (r === 'busy' || (r === undefined)) return `<h1>Paired</h1><p class="sub"><span class="spin"></span> Looking for the settings already on this phone…</p>`;
+    if (has) return `<h1>This phone already has settings</h1>
+      <p class="sub">Someone in your family set it up already. To keep their contacts, reminders and PIN, get a copy from the phone:</p>
+      <div class="card"><ol>
+        <li>On the phone, tap the battery number 7 times and enter the family PIN.</li>
+        <li>Wait 30 seconds with that screen open, then tap <b>Try again</b> below.</li>
+      </ol></div>
+      <button class="btn primary" data-a="restore">Try again</button>
+      <button class="btn danger" data-a="fresh">Start fresh instead (replaces everything on the phone)</button>`;
+    const known = status && status.pf;
+    if (known) setupPick = status.pf === 'child' ? 'child' : 'senior';
+    return `<h1>${known ? 'Almost done' : 'Who is this phone for?'}</h1>
+      <p class="sub">${known ? `Paired with a phone set up for a <b>${setupPick === 'child' ? 'child' : 'senior'}</b>. Add the names and you're ready.` : 'Paired. Pick who will use this phone, so it starts with the right settings.'}</p>
+      ${known ? '' : `<div class="pick">
+        <button class="${setupPick === 'senior' ? 'on' : ''}" data-a="pick" data-v="senior"><em>👴</em><b>Senior</b><span>Big text, the phone reads things aloud, calling new numbers allowed</span></button>
+        <button class="${setupPick === 'child' ? 'on' : ''}" data-a="pick" data-v="child"><em>🧒</em><b>Child</b><span>Calls only from contacts, bedtime lock, app time limits, "My location" button</span></button>
+      </div>`}
+      <div class="card">
+        <label class="f">Their name<input id="newname" placeholder="${setupPick === 'child' ? 'Aarav' : 'Dadu'}"></label>
+        <label class="f">Your name (shown on their phone)<input id="newguard" placeholder="${setupPick === 'child' ? 'Mummy' : 'Ravi'}" value="${esc(book.devices.find(d => d.cfg)?.cfg.guardian || '')}"></label>
+        <label class="f">New family PIN (4 to 8 digits)<input id="newpin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="Not 1234"></label>
+        <div class="info">Opens the family settings on their phone. Pick one ${setupPick === 'child' ? 'your child' : 'nobody else'} can't guess, not a birthday.</div>
+      </div>
+      <button class="btn primary" data-a="setup">Start</button>`;
+  }
   function unpaired() {
-    return `<h1>SimplePhone Control</h1>
-      <p class="sub">Control your parent's simple Android phone from here.</p>
+    const more = book.devices.length > 0;
+    return `<h1>${more ? 'Add a phone' : 'KinPhone Control'}</h1>
+      <p class="sub">Look after a simple Android phone for a parent or a child, from here.</p>
       <div class="card"><h3>Pair with the phone</h3>
         <ol>
           <li>On the Android phone, tap the battery number (top right) 7 times.</li>
-          <li>Enter the family PIN (8515 the first time).</li>
+          <li>Enter the family PIN (1234 the first time).</li>
           <li>Point this iPhone's Camera at the QR code and tap the link.</li>
         </ol>
-      </div>`;
+      </div>${more ? '<button class="btn" data-a="canceladd">Cancel</button>' : ''}`;
   }
 
+  /** A "more time" request from the child's phone that has no answer yet. */
+  function openAsk(d = store) {
+    const st = statuses[d.id], q = st && st.mt;
+    if (!q || !d.cfg || (d.cfg.grants || []).some(g => g.id === q.id)) return null;
+    return q;
+  }
+  function askCard() {
+    const q = openAsk(); if (!q) return '';
+    const c = store.cfg, app = (APPS[q.app] || [q.app])[0];
+    const t = new Date(q.t).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+    return `<div class="card ask"><h3>Request</h3>
+      <div class="q"><div class="hg" aria-hidden="true">⏳</div><div><b>${esc(c.name)} asks for ${q.m} more minutes of ${esc(app)}</b><span>Today's limit is ${c.limits[q.app] || 0} min · asked at ${t}</span></div></div>
+      <div class="two"><button class="btn" data-a="grant" data-v="no">Not now</button><button class="btn primary" data-a="grant" data-v="yes">Give ${q.m} min</button></div>
+    </div>`;
+  }
   function home() {
     const c = store.cfg, m = c.mode;
     const wa = c.modes[m].includes('whatsapp');
-    return `${header()}
+    return `${phonesCard()}${header(false)}${askCard()}
       <div class="card"><h3>Mode</h3>
-        <div class="seg">${['basic', 'normal', 'full'].map(x => `<button class="${x === m ? 'on' : ''}" data-a="mode" data-v="${x}">${cap(x)}</button>`).join('')}</div>
-        <div class="info">${MODE_INFO[m]}</div>
+        ${['basic', 'full'].map((x, i) => `${i ? '<div class="sep"></div>' : ''}<button class="opt${x === m ? ' on' : ''}" data-a="mode" data-v="${x}" role="radio" aria-checked="${x === m}"><span class="rad"></span><span class="t"><b>${cap(x)}</b><span>${modeInfo(x)}</span></span></button>`).join('')}
+        <div class="sep"></div>
+        <div class="info">${m === 'basic' ? 'On the phone now:' : 'Apps on the phone now:'}</div>
         <div class="chips">${c.modes[m].map(a => `<span class="chip">${APPS[a][0]}</span>`).join('')}</div>
-        ${m !== 'basic' ? `<div class="sep"></div><div class="row"><div class="appic" style="background:${APPS.whatsapp[1]}">W</div><div class="t"><b>Show WhatsApp</b><span>${wa ? 'Visible' : 'Hidden'} in ${cap(m)} mode</span></div>${sw(wa, 'wa', m)}</div>` : ''}
+        ${m === 'full' ? `<button class="btn" data-a="tab" data-v="apps">Choose apps for Full mode</button>` : ''}
         ${sendLine()}
       </div>
       <div class="card"><h3>Safety</h3>
-        <div class="row"><div class="t"><b>Allow calling new numbers</b><span>Off means only saved contacts can be called</span></div>${sw(c.set.unknownDial, 'set', 'unknownDial')}</div>
-        <div class="sep"></div>
+        ${c.mode === 'basic' ? `<div class="row"><div class="t"><b>Show Dial button</b><span>Basic mode only. Off hides the Dial button on ${esc(c.name)}'s phone</span></div>${sw(c.set.unknownDial, 'set', 'unknownDial')}</div>
+        <div class="sep"></div>` : ''}
         <div class="row"><div class="t"><b>Block unknown callers</b><span>Numbers not in Contacts never ring</span></div>${sw(c.set.blockUnknown, 'set', 'blockUnknown')}</div>
         <div class="sep"></div>
         <div class="row"><div class="t"><b>Open links in SMS</b><span>Keep off to stop scam links</span></div>${sw(c.set.smsLinks, 'set', 'smsLinks')}</div>
@@ -285,21 +544,22 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
         <div class="row"><div class="t"><b>Show SOS button</b><span>${sosLine()}</span></div>${sw(c.set.sos, 'set', 'sos')}</div>
       </div>
       <div class="card"><h3>Lock</h3>
-        <div class="row"><div class="t"><b>Lock phone</b><span>${c.set.lock !== false ? 'On: top settings panel and back/home bar are hidden' : 'Off: Dad can open settings and use the back/home bar'}</span></div>${sw(c.set.lock !== false, 'set', 'lock')}</div>
+        <div class="row"><div class="t"><b>Lock phone</b><span>${c.set.lock !== false ? 'On: top settings panel and back/home bar are hidden' : 'Off: ' + esc(c.name) + ' can open settings and use the back/home bar'}</span></div>${sw(c.set.lock !== false, 'set', 'lock')}</div>
       </div>
       <div class="card"><h3>Notifications</h3>
-        <div class="row"><div class="t"><b>App pop-ups</b><span>${c.set.popups !== false ? 'On: banners from WhatsApp and other apps show' : 'Off: hidden. Calls, SMS, SOS and reminders still come through'}${c.set.popups === false && status && status.nl === false ? '. Needs one-time setup on Dad\'s phone (family settings, Set up pop-up blocker)' : ''}</span></div>${sw(c.set.popups !== false, 'set', 'popups')}</div>
+        <div class="row"><div class="t"><b>App pop-ups</b><span>${c.set.popups !== false ? 'On: banners from WhatsApp and other apps show' : 'Off: hidden. Calls, SMS, SOS and reminders still come through'}${c.set.popups === false && status && status.nl === false ? '. Needs one-time setup on ' + esc(c.name) + '\'s phone (family settings, Set up pop-up blocker)' : ''}</span></div>${sw(c.set.popups !== false, 'set', 'popups')}</div>
       </div>
       <div class="card"><h3>Display</h3>
         <div class="row"><div class="t"><b>Extra large text</b><span>Makes every word bigger</span></div>${sw(c.set.xl, 'set', 'xl')}</div>
       </div>
-      <div class="card"><h3>Night lock</h3>
-        <div class="row"><div class="t"><b>Basic mode at night</b><span>Every day, ${esc(c.night.from)} to ${esc(c.night.to)}</span></div>${sw(c.night.on, 'night')}</div>
+      <div class="card"><h3>${isKid() ? 'Bedtime' : 'Night lock'}</h3>
+        <div class="row"><div class="t"><b>${isKid() ? 'Calls only at bedtime' : 'Basic mode at night'}</b><span>Every day, ${esc(c.night.from)} to ${esc(c.night.to)}</span></div>${sw(c.night.on, 'night')}</div>
         <div class="grid2">
           <label class="f">From<input type="time" id="nfrom" value="${esc(c.night.from)}"></label>
           <label class="f">To<input type="time" id="nto" value="${esc(c.night.to)}"></label>
         </div>
-      </div>`;
+      </div>
+`;
   }
   function sosLine() {
     const s = store.cfg.contacts.filter(x => x.s > 0).sort((a, b) => a.s - b.s);
@@ -307,9 +567,10 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
   }
 
   function apps() {
-    const c = store.cfg, m = appsMode || c.mode;
-    return `<h1>Apps</h1><p class="sub">Choose what ${esc(c.name)} can open in each mode.</p>
-      <div class="seg">${['basic', 'normal', 'full'].map(x => `<button class="${x === m ? 'on' : ''}" data-a="appsmode" data-v="${x}">${cap(x)}${x === c.mode ? ' •' : ''}</button>`).join('')}</div>
+    const c = store.cfg, m = c.mode;
+    return `<h1>Apps</h1><p class="sub">${m === 'basic'
+      ? `${esc(c.name)}'s phone is in <b>Basic</b> mode: just Photo Dial, Contacts, Messages and Dial. Switch to Full on the Phone tab to choose more apps.`
+      : `${esc(c.name)}'s phone is in <b>Full</b> mode. Choose which apps ${esc(c.name)} can open.`}</p>
       <div class="card">${ORDER.map((a, i) => {
         const [label, color, core] = APPS[a];
         const on = c.modes[m].includes(a);
@@ -318,20 +579,64 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
           <div class="t"><b>${label}</b><span>${core ? 'Always on' : m === 'basic' ? 'Never in Basic mode' : on ? 'Visible' : 'Hidden'}</span></div>
           ${locked ? '<span class="lock">Locked</span>' : sw(on, 'app', a)}</div>`;
       }).join('')}</div>
-      <p class="sub" style="margin:0">• is the mode the phone uses now. Apps that are not installed on the phone are skipped.</p>
+      ${isKid() ? limitsCard() : ''}
+      <p class="sub" style="margin:0">Apps that are not installed on the phone are skipped.</p>
       ${sendLine()}`;
+  }
+
+  function limitsCard() {
+    const c = store.cfg, used = (status && status.use) || {};
+    const list = ORDER.filter(a => !APPS[a][2]);
+    return `<div class="card"><h3>Daily time limits</h3>
+      <div class="info">When the time is used up, the app greys out until tomorrow. Calls and messages are never limited.</div>
+      ${list.map((a, i) => {
+        const lim = c.limits[a] || 0, u = used[a] || 0;
+        return `${i ? '<div class="sep"></div>' : ''}<div class="row"><div class="appic" style="background:${APPS[a][1]}">${APPS[a][0][0]}</div>
+          <div class="t"><b>${APPS[a][0]}</b><span>${u ? u + ' min used today' : 'Not used today'}</span>${lim ? `<div class="bar"><i class="${u >= lim ? 'over' : ''}" style="width:${Math.min(100, Math.round(u / lim * 100))}%"></i></div>` : ''}</div>
+          <div class="step"><button data-a="lim" data-v="${a}:-1" aria-label="Less time">−</button><b>${lim ? lim + ' min' : 'No limit'}</b><button data-a="lim" data-v="${a}:1" aria-label="More time">+</button></div></div>`;
+      }).join('')}</div>`;
+  }
+
+  function locate() {
+    const c = store.cfg, L = status && status.loc;
+    const E = status && status.le, isLoc = c.req && c.req.type === 'loc', fresh = L && isLoc && L.t >= c.req.ts;
+    const failed = isLoc && !fresh && E && E.t >= c.req.ts;
+    const asking = isLoc && !fresh && !failed && Date.now() - c.req.ts < 180000;
+    const noAnswer = isLoc && !fresh && !failed && !asking && Date.now() - c.req.ts < 3600000;
+    const at = L ? (L.ft || L.t) : 0, old = L && L.t - at > 10 * 60000;
+    const ck = (status && status.ck || []).slice().reverse().slice(0, 10);
+    const maps = p => `https://maps.google.com/?q=${p.lat},${p.lng}`;
+    return `${header()}
+      <div class="card"><h3>Where is ${esc(c.name)}</h3>
+        ${L ? `<div class="loc"><div class="pin">${ic('pin')}</div><div class="t" style="flex:1"><b>${ago(at)}</b><span class="info">${WHY[L.why] || 'Shared'} · ${new Date(at).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}${L.acc ? ' · within ' + Math.round(L.acc) + ' m' : ''}</span></div><a class="lnk" href="${maps(L)}" target="_blank" rel="noopener">Open in Maps</a></div>
+          ${old ? `<div class="info" style="color:var(--danger)"><b>Old position.</b> The phone couldn't measure a new one, so it sent the last one it knew, from ${ago(at)}.</div>` : ''}`
+          : '<div class="info">No location yet. Tap Locate now.</div>'}
+        ${failed ? `<div class="info" style="color:var(--danger)"><b>Couldn't get a location.</b> ${E.why === 'perm' ? `KinPhone isn't allowed to use location on ${esc(c.name)}'s phone. Open the family settings there and tap Give KinPhone its permissions.` : `Location is switched off on ${esc(c.name)}'s phone, or it has no signal. Ask them to switch Location on.`}</div>` : ''}
+        ${noAnswer ? `<div class="info" style="color:var(--danger)"><b>No answer from ${esc(c.name)}'s phone.</b> It may be switched off, out of battery or offline. Try again later.</div>` : ''}
+        <button class="btn primary" data-a="locnow"${asking ? ' disabled' : ''}>${asking ? `<span class="spin"></span> Asking ${esc(c.name)}'s phone…` : 'Locate now'}</button>
+        <div class="info">${esc(c.name)}'s phone answers within about a minute and shows a note that it shared its location.</div>
+      </div>
+      <div class="card"><h3>Share location automatically</h3>
+        <div class="info">Every day at these times, ${esc(c.name)}'s phone sends you where it is.</div>
+        <div class="tchips">${c.loc.times.length ? c.loc.times.map((t, i) => `<span>${t12(t).replace(/<\/?small>/g, ' ')}<button data-a="locdel" data-v="${i}" aria-label="Remove">✕</button></span>`).join('') : '<span style="padding:6px 12px">No times yet</span>'}</div>
+        <div class="grid2"><label class="f">Add a time<input type="time" id="locadd" value="15:00"></label><button class="btn" data-a="locadd" style="align-self:end">Add</button></div>
+      </div>
+      <div class="card"><h3>Sent by ${esc(c.name)}</h3>
+        ${ck.length ? ck.map((e, i) => `${i ? '<div class="sep"></div>' : ''}<div class="row"><div class="t"><b>${esc(e.label)}</b><span>${new Date(e.t).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</span></div>${e.lat ? `<a class="lnk" href="${maps(e)}" target="_blank" rel="noopener">Map</a>` : ''}</div>`).join('')
+          : `<div class="info">When ${esc(c.name)} taps <b>My location</b> on the phone, it shows up here. For an alert on your phone, subscribe to the alert topic in Settings.</div>`}
+      </div>`;
   }
 
   function contacts() {
     const c = store.cfg;
     const favs = c.contacts.filter(x => x.f).length;
     if (editing) return contactForm();
-    return `<h1>Contacts</h1><p class="sub">Star up to 4 people to show as big call buttons (${favs} of 4). SOS people get an SMS with location.</p>
+    return `<h1>Contacts</h1><p class="sub">Switch on up to 4 people to show as big call buttons on the home screen (${favs} of 4). SOS people get an SMS with location.</p>
       <div class="card">${c.contacts.length ? c.contacts.map((p, i) => `${i ? '<div class="sep"></div>' : ''}<div class="row">
-          <div class="av" style="width:40px;height:40px;font-size:17px;background:${['#B4532A', '#7B3FA0', '#1565C0', '#C2185B', '#00796B', '#5D4037'][i % 6]}">${esc(p.n[0])}</div>
-          <div class="t" data-a="edit" data-v="${i}"><b>${esc(p.n)}${p.s ? `<span class="badge">SOS ${p.s}</span>` : ''}</b><span>${esc(p.r)} · ${esc(p.p)}</span></div>
-          <button class="star${p.f ? ' on' : ''}" data-a="fav" data-v="${i}" aria-label="Home screen">★</button></div>`).join('')
-        : '<div class="info">No contacts yet. Add the people your parent calls most.</div>'}</div>
+          ${faceHtml(p, 40, ['#B4532A', '#7B3FA0', '#1565C0', '#C2185B', '#00796B', '#5D4037'][i % 6])}
+          <div class="t" data-a="edit" data-v="${i}"><b>${esc(p.n)}${p.s ? `<span class="badge">SOS ${p.s}</span>` : ''}</b><span>${p.r ? esc(p.r) + ' · ' : ''}${esc(p.p)}</span></div>
+          ${sw(!!p.f, 'fav', i)}</div>`).join('')
+        : `<div class="info">No contacts yet. Add the people ${esc(c.name)} calls most.</div>`}</div>
       <button class="btn primary" data-a="add">Add contact</button>
       ${sendLine()}`;
   }
@@ -340,6 +645,10 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     const isNew = editing.i < 0;
     return `<h1>${isNew ? 'Add contact' : 'Edit contact'}</h1>
       <div class="card">
+        <div class="row">${faceHtml({ n: p.n || '?', p: p.p }, 64, '#5D4037', editing.photo)}
+          <div class="t"><b>Photo</b><span>Shown on the Photo Dial. Shrunk and sent privately to the phone.</span></div></div>
+        <div class="grid2"><label class="btn" style="cursor:pointer">${(editing.photo ?? photoOf(p.p)) ? 'Change photo' : 'Add photo'}<input type="file" id="cph" accept="image/*" hidden></label>
+          ${(editing.photo ?? photoOf(p.p)) ? '<button class="btn danger" data-a="rmph">Remove photo</button>' : ''}</div>
         <label class="f">Name<input id="cn" value="${esc(p.n)}" placeholder="Ravi"></label>
         <label class="f">Description<input id="cr" value="${esc(p.r)}" placeholder="Place or work (optional)"></label>
         <label class="f">Phone number<input id="cp" value="${esc(p.p)}" inputmode="tel" placeholder="+91 98640 12345"></label>
@@ -377,7 +686,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
           <div class="rtime" data-a="redit" data-v="${r.i}">${t12(r.at)}</div>
           <div class="t" data-a="redit" data-v="${r.i}"><b>${esc(r.t)}</b><span>${repeatText(r)}${r.on ? '' : ' · Paused'}</span>${todayState(r)}</div>
           ${sw(r.on, 'ron', r.i)}</div>`).join('')
-        : '<div class="info">No reminders yet. Add medicines, meals, a walk, or anything else.</div>'}</div>
+        : `<div class="info">No reminders yet. Add ${isKid() ? 'homework, tuition, drinking water' : 'medicines, meals, a walk'}, or anything else.</div>`}</div>
       <button class="btn primary" data-a="radd">Add reminder</button>
       ${log.length ? `<div class="card"><h3>Recent</h3>${log.map((e, i) => `${i ? '<div class="sep"></div>' : ''}<div class="row"><div class="t"><b>${esc(e.t)}</b><span>${new Date(e.at).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</span></div><span class="rstate ${e.s}">${e.s === 'done' ? '✓ Done' : e.s === 'missed' ? 'Missed' : 'Snoozed'}</span></div>`).join('')}</div>` : ''}
       ${sendLine()}`;
@@ -387,7 +696,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     const mode = r.dt ? 'once' : !r.d.length || r.d.length === 7 ? 'daily' : 'days';
     return `<h1>${isNew ? 'Add reminder' : 'Edit reminder'}</h1>
       <div class="card">
-        <label class="f">Message<input id="rt" value="${esc(r.t)}" placeholder="Take your BP tablet" maxlength="80"></label>
+        <label class="f">Message<input id="rt" value="${esc(r.t)}" placeholder="${isKid() ? 'Finish your homework' : 'Take your BP tablet'}" maxlength="80"></label>
         <label class="f">Time<input id="rtime" type="time" value="${esc(r.at)}"></label>
         <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)">Repeat
           <div class="seg">${[['daily', 'Every day'], ['days', 'Some days'], ['once', 'Once']].map(([k, l]) => `<button class="${mode === k ? 'on' : ''}" data-a="rmode" data-v="${k}">${l}</button>`).join('')}</div></div>
@@ -411,14 +720,15 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     const c = store.cfg;
     return `<h1>Settings</h1>
       <div class="card"><h3>Names</h3>
-        <label class="f">Your parent's name<input id="sname" value="${esc(c.name)}"></label>
+        <label class="f">Their name<input id="sname" value="${esc(c.name)}"></label>
         <label class="f">Your name (shown on their phone)<input id="sguard" value="${esc(c.guardian)}"></label>
       </div>
       <div class="card"><h3>Family PIN</h3>
-        <div class="info">Unlocks the family settings on the phone (tap the battery number 7 times).</div>
-        <label class="f">PIN (4 to 8 digits)<input id="spin" value="${esc(c.pin)}" inputmode="numeric" maxlength="8"></label>
+        <div class="info">Unlocks the family settings on the phone (tap the battery number 7 times). You get an alert when it is used or guessed wrong.</div>
+        ${weakPin(c.pin) ? `<div class="info" style="color:var(--danger)"><b>Easy to guess.</b> Until you change it, Normal phone and Remove lockdown stay off on the phone.</div>` : ''}
+        <label class="f">PIN (4 to 8 digits)<input id="spin" type="password" value="${esc(c.pin)}" inputmode="numeric" maxlength="8" autocomplete="new-password"></label>
       </div>
-      <div class="card"><h3>SOS alerts on this iPhone</h3>
+      <div class="card"><h3>SOS${isKid() ? ' and location' : ''} alerts on this iPhone</h3>
         <ol>
           <li>Install the free <b>ntfy</b> app from the App Store.</li>
           <li>Tap +, keep server ntfy.sh, and subscribe to this topic:</li>
@@ -427,21 +737,31 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
         <button class="btn" data-a="copysos">Copy topic</button>
         <div class="info">You will get a loud alert with the map location when SOS is pressed. Keep this topic private.</div>
       </div>
+      <div class="card"><h3>Normal phone</h3>
+        ${status && status.np
+          ? `<div class="info"><b>${esc(c.name)}'s phone is a normal phone now.</b> KinPhone is off: no lock, time limits, reminders or call blocking. To turn it back on, open the KinPhone app on ${esc(c.name)}'s phone and tap <b>Use KinPhone again</b>.</div>`
+          : `<div class="info">Turns KinPhone off on ${esc(c.name)}'s phone and gives back its own home screen, phone and SMS apps. Contacts and settings are kept. To turn it on again, open the KinPhone app on the phone and tap Use KinPhone again.</div>
+        <button class="btn" data-a="normal">${c.req && c.req.type === 'normal' && Date.now() - (c.req.ts || 0) < 120000 ? 'Sent. Waiting for the phone' : 'Switch to a normal phone'}</button>`}
+      </div>
       <div class="card"><h3>Sync</h3>
         <button class="btn" data-a="resend">Send all settings again</button>
-        <button class="btn danger" data-a="unpair">Unpair this iPhone</button>
+        <button class="btn danger" data-a="unpair">Remove ${esc(c.name)}'s phone from this page</button>
       </div>`;
   }
 
   function render() {
     const app = document.getElementById('app');
     const tabs = document.getElementById('tabs');
-    if (!store.pair) { app.innerHTML = unpaired(); tabs.hidden = true; return; }
     const active = document.activeElement && document.activeElement.id;
-    if (active && ['cn', 'cr', 'cp', 'sname', 'sguard', 'spin', 'rt', 'rtime', 'rdate'].includes(active)) return; // don't wipe typing
-    app.innerHTML = tab === 'home' ? home() : tab === 'apps' ? apps() : tab === 'contacts' ? contacts() : tab === 'rem' ? reminders() : settings();
+    if (active && ['cn', 'cr', 'cp', 'sname', 'sguard', 'spin', 'newpin', 'rt', 'rtime', 'rdate', 'newname', 'newguard', 'ck0', 'ck1', 'ck2', 'locadd'].includes(active)) return; // don't wipe typing
+    const sh = () => app.querySelectorAll('.card > h3:first-child').forEach(h => { h.classList.add('sh'); h.parentElement.before(h); });
+    if (!book.devices.length || adding) { app.innerHTML = unpaired(); sh(); tabs.hidden = true; return; }
+    if (!store.cfg) { if (!restore.has(store.id)) setTimeout(() => tryRestore(store), 0); app.innerHTML = setup(); sh(); tabs.hidden = true; return; }
+    if (tab === 'loc' && !isKid()) tab = 'home';
+    app.innerHTML = tab === 'home' ? home() : tab === 'apps' ? apps() : tab === 'loc' ? locate() : tab === 'contacts' ? contacts() : tab === 'rem' ? reminders() : settings();
+    sh();
     tabs.hidden = false;
-    tabs.innerHTML = [['home', 'gauge', 'Phone'], ['apps', 'apps', 'Apps'], ['contacts', 'user', 'Contacts'], ['rem', 'bell', 'Reminders'], ['settings', 'gear', 'Settings']]
+    tabs.innerHTML = [['home', 'gauge', 'Phone'], ['apps', 'apps', 'Apps'], ...(isKid() ? [['loc', 'pin', 'Location']] : []), ['contacts', 'user', 'Contacts'], ['rem', 'bell', 'Reminders'], ['settings', 'gear', 'Settings']]
       .map(([k, i, l]) => `<button class="${tab === k ? 'on' : ''}" data-a="tab" data-v="${k}">${ic(i)}${l}</button>`).join('');
   }
 
@@ -450,13 +770,54 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
     const a = b.dataset.a, v = b.dataset.v;
     const c = store.cfg;
     switch (a) {
-      case 'tab': tab = v; editing = null; appsMode = null; render(); window.scrollTo(0, 0); break;
+      case 'tab': tab = v; editing = null; appsMode = null; render(); window.scrollTo(0, 0); if (v === 'loc' || v === 'apps') pollStatus(); break;
+      case 'switch': { const d = book.devices.find(x => x.id === v); if (d && d !== store) { use(d); tab = 'home'; editing = null; appsMode = null; render(); pollStatus(d); window.scrollTo(0, 0); } break; }
+      case 'addphone': adding = true; render(); window.scrollTo(0, 0); break;
+      case 'canceladd': adding = false; render(); break;
+      case 'pick': setupPick = v; setupTouched = true; { const n = val('newname'), g = val('newguard'); render(); document.getElementById('newname').value = n; document.getElementById('newguard').value = g; } break;
+      case 'restore': restore.delete(store.id); tryRestore(store); break;
+      case 'fresh': if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Tap again: erase their contacts, reminders and PIN'; break; }
+        status = Object.assign({}, status, { cts: 0 }); statuses[store.id] = status; render(); break;
+      case 'setup': {
+        const n = val('newname'), g = val('newguard');
+        if (!n) { toast('Type their name.'); break; }
+        const np = val('newpin').replace(/\D/g, '');
+        if (weakPin(np)) { toast(np.length < 4 ? 'Choose a family PIN of 4 to 8 digits.' : 'That PIN is easy to guess. Try another.'); break; }
+        store.cfg = defaults(setupPick); store.cfg.name = n; store.cfg.guardian = g || 'family'; store.cfg.pin = np; store.cfg.ts = Date.now();
+        if (g) book.me = g;
+        save(); tab = 'home'; render(); publish(); toast('Paired with ' + n + "'s phone");
+        break;
+      }
+      case 'profile': if (v !== c.profile) { change(c => { c.profile = v; ensure(c); }); toast(v === 'child' ? 'Child profile on. Check Safety and time limits.' : 'Senior profile on.'); } break;
+      case 'lim': {
+        const [app, dir] = v.split(':'); const cur = c.limits[app] || 0;
+        const i = LIMIT_STEPS.indexOf(LIMIT_STEPS.reduce((b, x) => Math.abs(x - cur) < Math.abs(b - cur) ? x : b, 0));
+        const nx = LIMIT_STEPS[Math.max(0, Math.min(LIMIT_STEPS.length - 1, i + (+dir)))];
+        change(c => { if (nx) c.limits[app] = nx; else delete c.limits[app]; });
+        break;
+      }
+      case 'grant': { const q = openAsk(); if (!q) break; const ok = v === 'yes';
+        change(c => { c.grants = [...(c.grants || []).slice(-9), { id: q.id, app: q.app, m: q.m, ok, t: Date.now() }]; });
+        toast(ok ? `Given. ${c.name}'s phone gets ${q.m} more minutes within 30 seconds.` : `Sent "not now" to ${c.name}'s phone.`); break; }
+      case 'normal': if (b.dataset.sure) { change(c => c.req = { id: 'n' + Date.now().toString(36), type: 'normal', ts: Date.now() }); toast(c.name + "'s phone switches within 30 seconds."); }
+        else { b.dataset.sure = '1'; b.textContent = 'Tap again to switch ' + c.name + "'s phone to normal"; b.classList.add('danger'); } break;
+      case 'locnow': change(c => c.req = { id: 'q' + Date.now().toString(36), type: 'loc', ts: Date.now() }); break;
+      case 'locdel': change(c => c.loc.times.splice(+v, 1)); break;
+      case 'locadd': {
+        const t = (document.getElementById('locadd').value || '').slice(0, 5);
+        if (!/^\d{2}:\d{2}$/.test(t)) { toast('Pick a time.'); break; }
+        if (c.loc.times.includes(t)) { toast('That time is already set.'); break; }
+        if (c.loc.times.length >= 8) { toast('Up to 8 times a day.'); break; }
+        document.activeElement && document.activeElement.blur();
+        change(c => { c.loc.times.push(t); c.loc.times.sort(); });
+        break;
+      }
       case 'mode': if (v !== c.mode) change(c => c.mode = v); break;
       case 'wa': change(c => toggleApp(c, v, 'whatsapp')); break;
       case 'set': change(c => c.set[v] = (v === 'lock' || v === 'popups') ? c.set[v] === false : !c.set[v]); break;
       case 'night': change(c => c.night.on = !c.night.on); break;
       case 'appsmode': appsMode = v; render(); break;
-      case 'app': change(c => toggleApp(c, appsMode || c.mode, v)); break;
+      case 'app': change(c => toggleApp(c, c.mode, v)); break;
       case 'fav': {
         const p = c.contacts[+v];
         if (!p.f && c.contacts.filter(x => x.f).length >= 4) { toast('The home screen holds 4 people. Remove a star first.'); break; }
@@ -466,6 +827,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
       case 'edit': editing = { i: +v, p: { ...c.contacts[+v] } }; render(); break;
       case 'cancelc': editing = null; render(); break;
       case 'savec': {
+        const phNew = editing.photo;
         const p = { n: val('cn'), r: val('cr'), p: val('cp'), f: editing.p.f || 0, s: +document.getElementById('cs').value };
         if (!p.n || p.p.replace(/\D/g, '').length < 6) { toast('Add a name and a full phone number.'); break; }
         const i = editing.i; editing = null;
@@ -474,6 +836,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
           if (p.s) c.contacts.forEach((x, j) => { if (x.s === p.s && j !== i) x.s = 0; });
           if (i < 0) c.contacts.push(p); else c.contacts[i] = p;
         });
+        if (phNew !== undefined) setPhoto(p.p, phNew);
         break;
       }
       case 'delc': { const i = editing.i; editing = null; change(c => c.contacts.splice(i, 1)); break; }
@@ -499,18 +862,64 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
       }
       case 'rdel': { const i = editing.i; editing = null; change(c => c.rem.splice(i, 1)); break; }
       case 'copysos': copy(store.pair.topic + 'a'); break;
-      case 'resend': store.cfg.ts = Date.now(); save(); publish(); toast('Sent'); break;
-      case 'unpair': if (b.dataset.sure) { store.pair = null; keyP = null; status = null; save(); render(); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to unpair'; } break;
+      case 'resend': store.cfg.ts = Date.now(); save(); publish(); Object.keys(store.photos || {}).forEach(k => sendPhoto(store, k, store.photos[k])); toast('Sent'); break;
+      case 'rmph': editing.photo = ''; render(); break;
+      case 'unpair': if (b.dataset.sure) {
+          keys.delete(store.id); delete statuses[store.id];
+          book.devices = book.devices.filter(d => d !== store);
+          if (book.devices.length) use(book.devices[0]); else { store = { id: null, pair: null, cfg: null }; book.cur = null; status = null; save(); }
+          tab = 'home'; render();
+        } else { b.dataset.sure = '1'; b.textContent = 'Tap again to remove'; } break;
     }
   });
-  document.addEventListener('change', e => {
+  /* ----- contact photos: shrunk to 96 px, kept on this page, sent to the phone on <topic>p ----- */
+  const pkey = num => String(num || '').replace(/\D/g, '').slice(-10);
+  const photoOf = num => (store.photos || {})[pkey(num)] || '';
+  function faceHtml(p, size, col, override) {
+    const ph = override !== undefined ? override : photoOf(p.p);
+    return ph ? `<img src="${ph}" alt="" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex:none">`
+      : `<div class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size * .42)}px;background:${col}">${esc((p.n || '?')[0])}</div>`;
+  }
+  function shrink(file) {
+    return new Promise((res, rej) => {
+      const img = new Image(); img.onerror = rej;
+      img.onload = () => {
+        const S = 96, cv = document.createElement('canvas'); cv.width = cv.height = S;
+        const m = Math.min(img.width, img.height);
+        cv.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, S, S);
+        let q = .75, out = cv.toDataURL('image/jpeg', q);
+        while (out.length > 2700 && q > .2) { q -= .08; out = cv.toDataURL('image/jpeg', q); }
+        URL.revokeObjectURL(img.src); res(out);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  async function sendPhoto(d, key, data) {
+    if (!d.pair) return;
+    try { await fetch(NTFY + d.pair.topic + 'p', { method: 'POST', body: await encrypt(JSON.stringify({ k: key, d: data || '', t: Date.now() }), d) }); } catch (e) {}
+  }
+  function setPhoto(num, data) {
+    const k = pkey(num); if (k.length < 6) return;
+    store.photos = store.photos || {};
+    if (data) store.photos[k] = data; else delete store.photos[k];
+    save(); sendPhoto(store, k, data);
+  }
+
+  document.addEventListener('change', async e => {
+    if (e.target.id === 'cph' && e.target.files[0] && editing) {
+      try { editing.p.n = val('cn') || editing.p.n; editing.p.r = val('cr'); editing.p.p = val('cp') || editing.p.p; editing.photo = await shrink(e.target.files[0]); document.activeElement && document.activeElement.blur(); render(); }
+      catch (_) { toast('Could not read that photo'); }
+      return;
+    }
     const id = e.target.id;
     if (id === 'nfrom' || id === 'nto') change(c => c.night[id === 'nfrom' ? 'from' : 'to'] = e.target.value);
-    if (id === 'sname') change(c => c.name = e.target.value.trim() || 'Dad');
+    if (id === 'sname') change(c => c.name = e.target.value.trim() || c.name);
+    if (/^ck[0-2]$/.test(id)) change(c => { const a = [0, 1, 2].map(i => (document.getElementById('ck' + i) || {}).value || c.checkin[i] || '').map(s => s.trim()); c.checkin = a.filter(Boolean); if (!c.checkin.length) c.checkin = ['Reached school']; });
     if (id === 'sguard') change(c => c.guardian = e.target.value.trim() || 'family');
     if (id === 'spin') {
       const p = e.target.value.replace(/\D/g, '');
       if (p.length < 4) { toast('PIN needs 4 to 8 digits'); e.target.value = c.pin; return; }
+      if (weakPin(p)) { toast('That PIN is easy to guess. Try another.'); e.target.value = c.pin; return; }
       change(c => c.pin = p); toast('PIN changed');
     }
   });
@@ -529,7 +938,7 @@ ol { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; }
   }
 
   render();
-  pollStatus();
+  pollAll();
 })();
 </script>
 </body>
