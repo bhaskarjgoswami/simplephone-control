@@ -150,6 +150,13 @@ ol { margin: 0; padding-left: 20px; line-height: 1.55; font-size: 16px; }
 .bar i.over { background: var(--danger); }
 .loc { display: flex; gap: 12px; align-items: center; }
 .ask { background: #FFF6E0; }
+.book { display: grid; gap: 8px; }
+.book input[type=search] { width: 100%; font: inherit; font-size: 17px; padding: 10px 12px; border-radius: 10px; border: 0; background: var(--fill); color: var(--fg); }
+.blist { max-height: 300px; overflow: auto; border-radius: 10px; }
+.brow { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 10px 4px; font: inherit; color: var(--fg); }
+.brow b { display: block; font-weight: 500; font-size: 16px; }
+.brow span { display: block; font-size: 13px; color: var(--muted); }
+.brow:disabled { opacity: .45; }
 @media (prefers-color-scheme: dark) { .ask { background: #3A2E12; } body .ask .q .hg { background: #5C4714; } }
 .ask .q { display: flex; gap: 12px; align-items: center; }
 .ask .q .hg { width: 40px; height: 40px; flex: none; border-radius: 50%; background: #FFE7A8; display: grid; place-items: center; font-size: 20px; }
@@ -649,6 +656,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
           <div class="t"><b>Photo</b><span>Shown on the Photo Dial. Shrunk and sent privately to the phone.</span></div></div>
         <div class="grid2"><label class="btn" style="cursor:pointer">${(editing.photo ?? photoOf(p.p)) ? 'Change photo' : 'Add photo'}<input type="file" id="cph" accept="image/*" hidden></label>
           ${(editing.photo ?? photoOf(p.p)) ? '<button class="btn danger" data-a="rmph">Remove photo</button>' : ''}</div>
+        ${isNew ? bookPicker() : ''}
         <label class="f">Name<input id="cn" value="${esc(p.n)}" placeholder="Ravi"></label>
         <label class="f">Description<input id="cr" value="${esc(p.r)}" placeholder="Place or work (optional)"></label>
         <label class="f">Phone number<input id="cp" value="${esc(p.p)}" inputmode="tel" placeholder="+91 98640 12345"></label>
@@ -657,6 +665,58 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       <button class="btn primary" data-a="savec">Save</button>
       <button class="btn" data-a="cancelc">Cancel</button>
       ${isNew ? '' : '<button class="btn danger" data-a="delc">Delete contact</button>'}`;
+  }
+
+  /* ----- choose from the contacts already saved on their phone ----- */
+  // Kept in memory only (never saved on this page): device id -> { st: 'asking'|'ready'|'fail', list: [[name, number]], q, open }
+  const books = new Map();
+  function bookPicker() {
+    const c = store.cfg, b = books.get(store.id);
+    if (!b) return `<button class="btn" data-a="book">${ic('user')} Choose from ${esc(c.name)}'s phone</button>`;
+    if (b.st === 'asking') return `<div class="info"><span class="spin"></span> Asking ${esc(c.name)}'s phone for its contacts…</div>`;
+    if (b.st === 'fail') return `<div class="info" style="color:var(--danger)">${esc(c.name)}'s phone didn't answer. It may be off or offline.</div><button class="btn" data-a="book">Try again</button>`;
+    if (!b.open) return `<button class="btn" data-a="bookopen">${ic('user')} Choose from ${esc(c.name)}'s phone (${b.list.length})</button>`;
+    const q = (b.q || '').toLowerCase(), qd = q.replace(/\D/g, '');
+    const have = new Set(c.contacts.map(x => pkey(x.p)));
+    const rows = b.list.map((x, i) => [x, i]).filter(([x]) => !q || x[0].toLowerCase().includes(q) || (qd && x[1].replace(/\D/g, '').includes(qd))).slice(0, 60);
+    return `<div class="book">
+      <input id="bq" type="search" placeholder="Search ${b.list.length} contacts" value="${esc(b.q || '')}" autocomplete="off">
+      <div class="blist">${rows.length ? rows.map(([x, i]) => `<button class="brow" data-a="pickbook" data-v="${i}"${have.has(pkey(x[1])) ? ' disabled' : ''}><b>${esc(x[0])}</b><span>${esc(x[1])}${have.has(pkey(x[1])) ? ' · already added' : ''}</span></button>`).join('') : '<div class="info" style="padding:10px 0">No match.</div>'}</div>
+      <button class="btn" data-a="bookclose">Type it myself instead</button>
+    </div>`;
+  }
+  async function fetchBook(d, since) {
+    try {
+      const r = await fetch(NTFY + d.pair.topic + 'b/json?poll=1&since=' + Math.floor(since / 1000));
+      const lines = (await r.text()).split('\n').filter(Boolean).reverse();
+      for (const line of lines) {
+        const o = JSON.parse(line); if (o.event !== 'message') continue;
+        let body = o.message;
+        if (o.attachment && o.attachment.url) { try { body = await (await fetch(o.attachment.url)).text(); } catch (e) { continue; } }
+        const p = await decrypt(body, d); if (!p) continue;
+        const j = JSON.parse(p); if (j.t >= since - 5000 && Array.isArray(j.list)) return j.list;
+      }
+    } catch (e) {}
+    return null;
+  }
+  function askBook() {
+    const d = store, since = Date.now();
+    keepForm();
+    books.set(d.id, { st: 'asking' }); render();
+    change(c => c.req = { id: 'b' + since.toString(36), type: 'book', ts: since });
+    let n = 0;
+    const tick = async () => {
+      const list = await fetchBook(d, since);
+      if (list) { books.set(d.id, { st: 'ready', list, open: true }); if (d === store) render(); return; }
+      if (++n >= 25) { books.set(d.id, { st: 'fail' }); if (d === store) render(); return; }
+      setTimeout(tick, 4000);
+    };
+    setTimeout(tick, 3000);
+  }
+  /** Keep what was typed in the contact form before the screen redraws. */
+  function keepForm() {
+    if (!editing || !editing.p) return;
+    ['cn', 'cr', 'cp'].forEach(id => { const el = document.getElementById(id); if (el) editing.p[{ cn: 'n', cr: 'r', cp: 'p' }[id]] = el.value; });
   }
 
   /* ----- reminders ----- */
@@ -753,7 +813,7 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
     const app = document.getElementById('app');
     const tabs = document.getElementById('tabs');
     const active = document.activeElement && document.activeElement.id;
-    if (active && ['cn', 'cr', 'cp', 'sname', 'sguard', 'spin', 'newpin', 'rt', 'rtime', 'rdate', 'newname', 'newguard', 'ck0', 'ck1', 'ck2', 'locadd'].includes(active)) return; // don't wipe typing
+    if (active && ['bq', 'cn', 'cr', 'cp', 'sname', 'sguard', 'spin', 'newpin', 'rt', 'rtime', 'rdate', 'newname', 'newguard', 'ck0', 'ck1', 'ck2', 'locadd'].includes(active)) return; // don't wipe typing
     const sh = () => app.querySelectorAll('.card > h3:first-child').forEach(h => { h.classList.add('sh'); h.parentElement.before(h); });
     if (!book.devices.length || adding) { app.innerHTML = unpaired(); sh(); tabs.hidden = true; return; }
     if (!store.cfg) { if (!restore.has(store.id)) setTimeout(() => tryRestore(store), 0); app.innerHTML = setup(); sh(); tabs.hidden = true; return; }
@@ -826,6 +886,10 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       case 'add': editing = { i: -1, p: { n: '', r: '', p: '', f: 0, s: 0 } }; render(); break;
       case 'edit': editing = { i: +v, p: { ...c.contacts[+v] } }; render(); break;
       case 'cancelc': editing = null; render(); break;
+      case 'book': askBook(); break;
+      case 'bookopen': keepForm(); books.get(store.id).open = true; render(); break;
+      case 'bookclose': keepForm(); books.get(store.id).open = false; render(); break;
+      case 'pickbook': { keepForm(); const bk = books.get(store.id), x = bk.list[+v]; editing.p.n = x[0]; editing.p.p = x[1]; bk.open = false; render(); toast(x[0] + ' picked. Add a photo or description, then Save.'); break; }
       case 'savec': {
         const phNew = editing.photo;
         const p = { n: val('cn'), r: val('cr'), p: val('cp'), f: editing.p.f || 0, s: +document.getElementById('cs').value };
@@ -922,6 +986,14 @@ a.lnk { color: var(--accent); font-weight: 400; text-decoration: none; font-size
       if (weakPin(p)) { toast('That PIN is easy to guess. Try another.'); e.target.value = c.pin; return; }
       change(c => c.pin = p); toast('PIN changed');
     }
+  });
+  document.addEventListener('input', e => {
+    if (e.target.id !== 'bq') return;
+    const b = books.get(store.id); if (!b) return;
+    b.q = e.target.value;
+    const tmp = document.createElement('div'); tmp.innerHTML = bookPicker();
+    const fresh = tmp.querySelector('.blist'), old = document.querySelector('.book .blist');
+    if (fresh && old) old.replaceWith(fresh);
   });
   function val(id) { return (document.getElementById(id).value || '').trim(); }
   function toggleApp(c, mode, app) {
